@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/react-uks/static/css/main.664c6d8b.css",
+    "main.js": "/react-uks/static/js/main.73f528f1.js",
+    "static/js/453.393dfe55.chunk.js": "/react-uks/static/js/453.393dfe55.chunk.js",
+    "static/media/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.png": "/react-uks/static/media/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.297149363c0d72f1b0a9.png",
+    "index.html": "/react-uks/index.html",
+    "main.664c6d8b.css.map": "/react-uks/static/css/main.664c6d8b.css.map",
+    "main.73f528f1.js.map": "/react-uks/static/js/main.73f528f1.js.map",
+    "453.393dfe55.chunk.js.map": "/react-uks/static/js/453.393dfe55.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.664c6d8b.css",
+    "static/js/main.73f528f1.js"
+  ]
+}
