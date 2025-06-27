@@ -4,27 +4,35 @@ function SideBar(props) {
   const items = [
     { name: "Home", icon: "bi bi-house-door-fill", onClick: ()=>{props.setView("home")} },
     { name: "Profile", icon: "bi bi-person-fill", onClick: ()=>{props.setView("profil")} },
-    { name: "Settings", icon: "bi bi-gear-fill" , onClick: ()=>{props.setView("setting")}},
-    { name: "Logout", icon: "bi bi-box-arrow-right", class: `w-full font-bold justify-center flex text-red-500 absolute ${props.nav && props.hober ?'bottom-44 p-2' :'bottom-32'} bg-white`, onClick: props.logot }
+    { name: "Settings", icon: "bi bi-gear-fill" , onClick: ()=>{props.setView("setting")}}
   ];
 
   const activeNav = items.findIndex(item => item.value === props.view)
   const itemHeight = 48;
   return (
-    <div className={`w-full h-screen bg-green-500 text-white ${props.class || ""}`}>
-      <div className="p-4">
-        <div className="flex mb-4">
-          <img src={props.logo} alt="Logo" className={`${props.nav && props.hober ?'w-8 h-8' :'w-18 h-18'} mr-2`} />
-          <div className={`flex flex-col w-full justify-center ${props.nav && props.hober ? "opacity-0" : "opacity-100"} transition-all duration-500 ease-in-out`}>
-            <h1 className="text-lg font-bold">UKS</h1>
-            <h2 className="text-md font-bold">SMK Negeri 2 Tasikmalaya</h2>
+    <div className={`w-full md:w-auto h-fit sm:h-screen bg-green-500 text-white ${props.class || ""}`}>
+      <div className="p-2 md:p-4">
+        <div className="flex flex-col sm:flex-row mb-2 md:mb-4 items-center">
+          <img
+            src={props.logo}
+            alt="Logo"
+            className={`${props.nav && props.hober ? 'w-8 h-8' : 'w-12 h-12 md:w-18 md:h-18'} sm:my-0 mb-2 mr-2`}
+          />
+          <div
+            className={`flex flex-col w-full sm:items-start items-center justify-center
+              ${props.nav && props.hober ? "opacity-0" : "opacity-100"}
+              transition-all duration-500 ease-in-out
+              ${props.nav && props.hober ? "hidden md:flex" : ""}
+            `}
+          >
+            <h1 className="text-base lg:block sm:hidden font-bold">UKS</h1>
+            <h2 className="text-xs lg:block sm:hidden font-bold">SMK Negeri 2 Tasikmalaya</h2>
           </div>
         </div>
-        <ul className="space-y-2 h-screen relative">
+        <ul className="flex sm:flex-col justify-center sm:justify-start md:space-y-2 h-12 md:h-screen relative">
           {activeNav !== -1 && (
             <div
               className="absolute left-0 w-full h-12 bg-green-700/80 rounded-lg z-0 transition-all duration-300"
-              style={{ top: `${activeNav * (itemHeight + 8)}px` }}
             ></div>
           )}
           {items.map((item, index) => (
@@ -33,8 +41,12 @@ function SideBar(props) {
               className={`flex z-10 items-center p-2 hover:bg-green-600 rounded-lg cursor-pointer ${item.class || ""}`}
               onClick={item.onClick}
             >
-              <i className={`${item.icon} mr-2 ${props.nav && props.hober ?'absolute right-0' :''}`}></i>
-              <span className={`${props.nav && props.hober ?'opacity-0' :'opacity-100'} transition-all duration-500 ease-in-out`}>{item.name}</span>
+              <i className={`${item.icon} mr-2 ${props.nav && props.hober ? 'absolute right-0' : ''}`}></i>
+              <span className={`
+                ${props.nav && props.hober ? 'opacity-0 hidden md:inline' : 'opacity-100'}
+                transition-all duration-500 ease-in-out
+                text-xs md:text-base
+              `}>{item.name}</span>
             </li>
           ))}
         </ul>
