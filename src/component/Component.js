@@ -1,10 +1,37 @@
 import React from "react";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+} from "chart.js";
 
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+function Card(props){
+  return (
+    <div className={`bg-${props.bgColor} shadow-gray-300 shadow-lg rounded-lg p-4 w-58 ${props.class || ""}`}>
+      <div className={`flex flex-col justify-center items-center`}>
+        <div>
+          <i className={`${props.icon} text-${props.iconColor} text-5xl mr-2`}></i>
+        </div> 
+        <div className={`flex flex-col`}>
+          <h2 className={`text-${props.text} font-bold text-lg`}>{props.title}</h2>
+          <p className={`text-${props.text} font-semibold text-center text-sm`}>{props.description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 function SideBar(props) {
   const items = [
-    { name: "Home", icon: "bi bi-house-door-fill", onClick: ()=>{props.setView("home")} },
-    { name: "Profile", icon: "bi bi-person-fill", onClick: ()=>{props.setView("profil")} },
-    { name: "Settings", icon: "bi bi-gear-fill" , onClick: ()=>{props.setView("setting")}}
+    { name: "Home", icon: "bi bi-house-door-fill",class:`${props.view === "home" && 'bg-green-900'}` , onClick: ()=>{props.setView("home")} },
+    { name: "Profile", icon: "bi bi-person-fill", class:`${props.view === "profil" && 'bg-green-900'}` ,onClick: ()=>{props.setView("profil")} },
+    { name: "Settings", icon: "bi bi-gear-fill" , class:`${props.view === "setting" && 'bg-green-900'}` ,onClick: ()=>{props.setView("setting")}}
   ];
 
   const activeNav = items.findIndex(item => item.value === props.view)
@@ -102,5 +129,36 @@ function Button(props) {
     </button>
   );
 }
+function Chart(){
+const data = {
+  labels: ["Data siswa", "Data obat", "Data kunjungan", "Data surat"],
+  datasets: [
+    {
+      label: "Jumlah",
+      data: [600, 876, 364, 534],
+      backgroundColor: [
+        "rgba(16, 185, 129, 0.7)",
+        "rgba(59, 130, 246, 0.7)",
+        "rgba(234, 179, 8, 0.7)",
+        "rgba(239, 68, 68, 0.7)"
+      ],
+      borderRadius: 8,
+    }
+  ]
+};
 
-export { FormFloating, Button, SideBar };
+const options = {
+  responsive: true,
+  plugins: {
+    legend: { display: false },
+    title: { display: true, text: "Statistik UKS" }
+  },
+  scales: {
+    y: { beginAtZero: true }
+  }
+};
+return(
+  <Bar data={data} options={options} className="w-full h-full mt-8" />
+)
+}
+export { FormFloating, Button, SideBar, Card, Chart };

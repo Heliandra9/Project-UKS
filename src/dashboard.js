@@ -36,7 +36,7 @@ function Dashboard() {
     }
     return(
         <div className="w-full h-full flex px-4 py-2 justify-center items-center bg-gray-300">
-            <div onMouseEnter={toggleHober} onMouseLeave={toggleHober} className={`${nav && hober ?'sm:w-16 w-full' :'sm:w-1/6 w-full'} z-100 sm:h-screen shadow-black shadow-lg transition-all duration-300 ease-in-out fixed top-0 left-0`}>
+            <div onMouseEnter={toggleHober} onMouseLeave={toggleHober} className={`${nav && hober ?'sm:w-16 w-full' :'sm:w-1/6 w-full'} z-100 sm:h-screen shadow-black shadow-lg transition-all duration-300 ease-in-out absolute sm:fixed top-0 left-0`}>
                 <SideBar className={`md:relative`} view={view} nav={nav} hober={hober} logo={logo} setView={setView} logot={logot}/>
             </div>
             <div className={`${nav ?'w-full ml-16' :'w-5/6 lg:ml-58 md:ml-40 sm:ml-30'} mt-58 sm:mt-0 transition-all duration-300 ease-in-out h-full flex flex-col`}>
