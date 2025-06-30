@@ -30,7 +30,7 @@ function Card(props){
 function SideBar(props) {
   const items = [
     { name: "Home", icon: "bi bi-house-door-fill",class:`${props.view === "home" && 'bg-green-900'}` , onClick: ()=>{props.setView("home")} },
-    { name: "Profile", icon: "bi bi-person-fill", class:`${props.view === "profil" && 'bg-green-900'}` ,onClick: ()=>{props.setView("profil")} },
+    { name: "Data Siswa", icon: "bi bi-person-fill", class:`${props.view === "siswa" && 'bg-green-900'}` ,onClick: ()=>{props.setView("siswa")} },
     { name: "Settings", icon: "bi bi-gear-fill" , class:`${props.view === "setting" && 'bg-green-900'}` ,onClick: ()=>{props.setView("setting")}}
   ];
 
@@ -162,4 +162,44 @@ return(
   <Bar data={data} options={options} className="w-full h-full mt-8" />
 )
 }
-export { FormFloating, Button, SideBar, Card, Chart };
+function Table(props){
+  const data = [
+    { no: 1, nama: "Heliandra Audrey Atha Fahrezi", kelas: "XII-RPL", nis: "12326107", keluhan: "Tunuh" },
+  ]
+  return(
+    <div className="relative overflow-x-auto w-full">
+      <table className="w-full text-sm text-left text-gray-500">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+          <tr>
+            <th scope="col" className="px-6 py-3">No</th>
+            <th scope="col" className="px-6 py-3">Nama Lengkap</th>
+            <th scope="col" className="px-6 py-3">Kelas</th>
+            <th scope="col" className="px-6 py-3">NIS</th>
+            <th scope="col" className="px-6 py-3">Keluhan</th>
+            <th scope="col" className="px-6 py-3">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item, index) => (
+            <tr className="bg-white border-b border-gray-200" key={index}>
+              <td className="px-6 py-4">{item.no}</td>
+              <td className="px-6 py-4">{item.nama}</td>
+              <td className="px-6 py-4">{item.kelas}</td>
+              <td className="px-6 py-4">{item.nis}</td>
+              <td className="px-6 py-4">{item.keluhan}</td>
+              <td className="px-6 py-4">
+                <button className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-blue-400 bg-blue-500 rounded-lg p-2">
+                  <i className="bi bi-pen-fill"></i>&nbsp;Edit
+                </button>
+                <button className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-red-400 bg-red-500 rounded-lg p-2 ml-2">
+                  <i className="bi bi-trash-fill"></i>&nbsp;Hapus
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+export { FormFloating, Button, SideBar, Card, Chart, Table };

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, SideBar } from "./component/Component";
 import logo from "./component/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.png";
 import Home from "./view/home";
-import Profil from "./view/profil";
+import Siswa from "./view/data_siswa";
 import Setting from "./view/setting";
 import { useNavigate } from "react-router-dom";
 import './App.css'
@@ -46,7 +46,7 @@ function Dashboard() {
                             <i className="bi bi-list text-xl"></i>
                         </Button>
                     </div>
-                    <div className={`absolute top-50 sm:top-4 transition-all duration-300 ease-in-out shadow-black right-4 ${modal ?' mb-4 bg-white rounded-2xl p-2 shadow-md' :''} flex flex-col`}>
+                    <div className={`absolute top-50 sm:top-4 transition-all duration-300 ease-in-out z-50 shadow-black right-4 ${modal ?' mb-4 bg-white rounded-2xl p-2 shadow-md' :''} flex flex-col`}>
                         <p onClick={funcModal} className={`text-lg font-bold bg-white shadow-black ${modal ?'' :`hover:shadow-md`} mb-4 rounded-2xl items-center transition-all duration-300 ease-in-out uppercase`}><i className="bi bi-person-fill bg-yellow-500 rounded-full my-2 ml-2"></i> {localStorage.getItem("username")}&nbsp;&nbsp;</p>
                         <Button color={`red-500 ${modal ?''  :'hidden'} bottom-0`} textColor="white" onClick={logot}>
                             <i className="bi bi-box-arrow-right"></i> Log Out
@@ -55,7 +55,7 @@ function Dashboard() {
                     
                 </div>
                 <div className="w-full h-full bg-white rounded-lg p-4 shadow-lg">
-                    {view === "home"  ? <Home /> :view === "profil" ? <Profil/> :view === "setting" && <Setting/>}
+                    {view === "home"  ? <Home /> :view === "siswa" ? <Siswa/> :view === "setting" && <Setting/>}
                 </div>
             </div>
         </div>
