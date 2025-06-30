@@ -94,6 +94,7 @@ function FormFloating(props) {
         name={props.name}
         className={`block px-2.5 pb-2.5 pt-4 ${borderColor} w-full text-sm text-gray-900 bg-transparent rounded-lg border appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer`}
         placeholder=" "
+        autoComplete={props.autoComplete || ''}
         value={props.value}
         onChange={props.onChange}
       />

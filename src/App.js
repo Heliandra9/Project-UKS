@@ -62,6 +62,7 @@ function App() {
             icon="bi bi-person-fill"
             type="text"
             name="username"
+            autoComplete="on"
             text="Username"
             data={data}
             value={username}
@@ -75,6 +76,7 @@ function App() {
             name="password"
             data={data}
             type={pw ? "text" : "password"}
+            autoComplete="off"
             class="mt-8"
             value={password}
             onChange={e => setPassword(e.target.value)}
