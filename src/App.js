@@ -16,7 +16,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost/login-uks/backend/proses/login.php", {
+      const response = await fetch("http://localhost/Project-UKS/backend/proses/login.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
@@ -33,7 +33,6 @@ function App() {
       navigate("/");
     }
   };
-
   useEffect(() => {
     if (localStorage.getItem("isLogin") === "true") {
       navigate("/dashboard");

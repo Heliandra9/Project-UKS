@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -99,7 +99,8 @@ function FormFloating(props) {
         onChange={props.onChange}
       />
 
-      <label
+      {props.text && (
+        <label
         htmlFor={props.name}
         className={`absolute ${iconColor} text-sm duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 
         peer-focus:px-2 peer-focus:text-blue-600 
@@ -110,6 +111,7 @@ function FormFloating(props) {
         <i className={props.icon}></i>&nbsp;{props.text}
       </label>
 
+      )}
       {props.name === "password" && (
         <span onClick={props.tooglepw} className={`absolute top-1/2 right-4 transform -translate-y-1/2 cursor-pointer ${iconColor} hover:text-gray-600`}>
           <i className={`${props.pw ? 'bi bi-eye' : 'bi bi-eye-slash'}`}></i>
@@ -164,34 +166,46 @@ return(
 }
 function Table(props){
   const data = [
-    { no: 1, nama: "Heliandra Audrey Atha Fahrezi", kelas: "XII-RPL", nis: "12326107", keluhan: "Tunuh" },
+    { nama: "Heliandra Audrey Atha Fahrezi", kelas: "XII-RPL", nis: "12326107", tb: 159, bb: 57, goldar: "AB-" },  
   ]
   return(
-    <div className="relative overflow-x-auto w-full">
-      <table className="w-full text-sm text-left text-gray-500">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+    <div className="relative overflow-x-auto w-full rounded-sm">
+      <table className="w-full text-sm text-left text-black">
+        <thead className="text-xs text-gray-900 uppercase bg-gray-500">
           <tr>
             <th scope="col" className="px-6 py-3">No</th>
             <th scope="col" className="px-6 py-3">Nama Lengkap</th>
             <th scope="col" className="px-6 py-3">Kelas</th>
             <th scope="col" className="px-6 py-3">NIS</th>
-            <th scope="col" className="px-6 py-3">Keluhan</th>
+            <th scope="col" className="px-6 py-3">Tinggi&nbsp;Badan</th>
+            <th scope="col" className="px-6 py-3">Berat&nbsp;Badan</th>
+            <th scope="col" className="px-6 py-3">Golongan&nbsp;Darah</th>
             <th scope="col" className="px-6 py-3">Aksi</th>
           </tr>
         </thead>
         <tbody>
           {data.map((item, index) => (
-            <tr className="bg-white border-b border-gray-200" key={index}>
-              <td className="px-6 py-4">{item.no}</td>
+            <tr className={`${index % 2 === 0 ?'bg-white' :'bg-gray-300'} border-b border-gray-200 cursor-pointer`} key={index}>
+              <td className="px-6 py-4">{index + 1}</td>
               <td className="px-6 py-4">{item.nama}</td>
               <td className="px-6 py-4">{item.kelas}</td>
               <td className="px-6 py-4">{item.nis}</td>
-              <td className="px-6 py-4">{item.keluhan}</td>
-              <td className="px-6 py-4">
-                <button className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-blue-400 bg-blue-500 rounded-lg p-2">
+              <td className="px-6 py-4">{item.tb}</td>
+              <td className="px-6 py-4">{item.bb}</td>
+              <td className="px-6 py-4">{item.goldar}</td>
+              <td className="px-6 py-4 flex">
+                <button onClick={()=>{
+                  props.setData(item);
+                  props.setM();
+                  props.funcName("edit")
+                }} className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-blue-400 bg-blue-500 rounded-lg p-2">
                   <i className="bi bi-pen-fill"></i>&nbsp;Edit
                 </button>
-                <button className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-red-400 bg-red-500 rounded-lg p-2 ml-2">
+                <button onClick={()=>{
+                  props.setData(item);
+                  props.setM();
+                  props.funcName("delete")
+                }} className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-red-400 bg-red-500 rounded-lg p-2 ml-2">
                   <i className="bi bi-trash-fill"></i>&nbsp;Hapus
                 </button>
               </td>
@@ -202,4 +216,50 @@ function Table(props){
     </div>
   )
 }
-export { FormFloating, Button, SideBar, Card, Chart, Table };
+function Modal(props) {
+  const fields = [
+    { name: "nama", label: "Nama" },
+    { name: "kelas", label: "Kelas" },
+    { name: "nis", label: "NIS" },
+    { name: "tb", label: "Tinggi Badan" },
+    { name: "bb", label: "Berat Badan" },
+    { name: "goldar", label: "Golongan Darah" }
+  ];
+
+  const [form, setForm] = useState({});
+
+  useEffect(() => {
+    setForm(props.data || {});
+  }, [props.data, props.statE]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  return (
+    <div className={`fixed inset-0 flex items-center justify-center z-50 ${props.stat ? 'block' : 'hidden'} backdrop-blur-sm`}>
+      <div className={`bg-white relative rounded-lg shadow-lg p-6 w-96`}>
+        <h2 className="text-xl font-bold mb-4">{props.title}</h2>
+        <div className="flex flex-col gap-2 mb-4"><i onClick={props.setM} className={`bi bi-x-lg absolute top-6 right-6 cursor-pointer`}></i>
+          {props.name === "edit" ? fields.map(field => (
+            <div key={field.name}>
+              <label className="text-gray-500">{field.label}</label>
+              <input
+                name={field.name}
+                className="w-full  border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in rounded-md p-2"
+                value={form[field.name] || ""}
+                onChange={handleChange}
+              />
+            </div>
+          )): (
+            <div className="text-center">Apakah anda yakin ingin mengahapus data <p className={`font-bold`}>{props.data && props.data.nama}</p></div>
+          )}
+        </div>
+        <Button color={props.name === 'edit' ? 'blue-500' :props.name ==='delete' && 'red-500'} textColor="white">
+          {props.name === 'edit' ? 'Simpan' :props.name === 'delete' && 'Hapus'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+export { FormFloating, Button, SideBar, Card, Chart, Table, Modal };
