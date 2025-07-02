@@ -165,9 +165,14 @@ return(
 )
 }
 function Table(props){
-  const data = [
-    { nama: "Heliandra Audrey Atha Fahrezi", kelas: "XII-RPL", nis: "12326107", tb: 159, bb: 57, goldar: "AB-" },  
-  ]
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost/pkl/project-uks/backend/proses/tampil_data_siswa.php") // sesuaikan path
+      .then(response => response.json())
+      .then(data => setData(data))
+      .catch(error => console.error("Error:", error));
+  }, []);
   return(
     <div className="relative overflow-x-auto w-full rounded-sm">
       <table className="w-full text-sm text-left text-black">
@@ -187,12 +192,12 @@ function Table(props){
           {data.map((item, index) => (
             <tr className={`${index % 2 === 0 ?'bg-white' :'bg-gray-300'} border-b border-gray-200 cursor-pointer`} key={index}>
               <td className="px-6 py-4">{index + 1}</td>
-              <td className="px-6 py-4">{item.nama}</td>
-              <td className="px-6 py-4">{item.kelas}</td>
+              <td className="px-6 py-4 capitalize">{item.nama}</td>
+              <td className="px-6 py-4 uppercase">{item.kelas}</td>
               <td className="px-6 py-4">{item.nis}</td>
-              <td className="px-6 py-4">{item.tb}</td>
-              <td className="px-6 py-4">{item.bb}</td>
-              <td className="px-6 py-4">{item.goldar}</td>
+              <td className="px-6 py-4">{item.tinggi_badan}</td>
+              <td className="px-6 py-4">{item.berat_badan}</td>
+              <td className="px-6 py-4">{item.golongan_darah}</td>
               <td className="px-6 py-4 flex">
                 <button onClick={()=>{
                   props.setData(item);
