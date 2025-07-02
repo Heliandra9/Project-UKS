@@ -1,17 +1,33 @@
 import {Table, Modal} from "../component/Component";
 import { useState } from "react";
 
-function Siswa() {
-  const [modal, setModal] = useState(false);
-  const [modalName, setModalName] = useState("");
+function Siswa(props) {
+  const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
+  const [data, setData] = useState("");
+
+
   const funcModal = () => {
-    setModal(!modal);
+    if (props.setModal) {
+      props.setModal(!props.modal);
+    }
   };
-  const [data, setData] = useState();
+
   return (
     <div className="w-full h-screen flex">
-        <Table setM={funcModal} funcName={setModalName} setData={setData}/>
-        <Modal setM={funcModal} name={modalName} data={data} title={modalName === 'edit' ? 'Edit data siswa' :modalName === 'delete' && 'Hapus data siswa'} stat={modal}/>
+        <Table setM={funcModal} cari={props.cari} funcName={setModalName} setData={setData}/>
+        <Modal
+          setM={funcModal}
+          name={modalName}
+          data={data}
+          title={
+            modalName === 'edit'
+              ? 'Edit data siswa'
+              : modalName === 'delete'
+              ? 'Hapus data siswa'
+              : props.modalName === 'insert' && 'Tambah data siswa'
+          }
+          stat={props.modal}
+        />
     </div>
   );
 }

@@ -125,7 +125,7 @@ function Button(props) {
   return (
     <button
       onClick={props.onClick}
-      className={`bg-${props.color} cursor-pointer hover:opacity-50 w-full p-2 text-${props.textColor} font-semibold rounded-2xl`}
+      className={`bg-${props.color} cursor-pointer hover:opacity-50 ${props.sizeTxT ? props.sizeTxT :''} ${props.width ? props.width :'w-full'} p-2 text-${props.textColor} font-semibold rounded-sm`}
       type={props.type}
     >
       {props.children}
@@ -165,9 +165,23 @@ return(
 )
 }
 function Table(props){
-  const data = [
-    { nama: "Heliandra Audrey Atha Fahrezi", kelas: "XII-RPL", nis: "12326107", tb: 159, bb: 57, goldar: "AB-" },  
-  ]
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost/Project-UKS/backend/proses/tampil_data_siswa.php")
+      .then(response => response.json())
+      .then(data => setData(data))
+      .catch(error => console.error("Error:", error));
+  }, []);
+  const Carisiswa = data.filter(item => {
+    if(!props.cari) return true;
+    const keyword = props.cari.toLowerCase();
+    return(
+      (item.nama && item.nama.toLowerCase().includes(keyword)) ||
+      (item.kelas && item.kelas.toLowerCase().includes(keyword)) ||
+      (item.nis && item.nis.toString().includes(keyword))
+    )
+  })
   return(
     <div className="relative overflow-x-auto w-full rounded-sm">
       <table className="w-full text-sm text-left text-black">
@@ -184,15 +198,15 @@ function Table(props){
           </tr>
         </thead>
         <tbody>
-          {data.map((item, index) => (
+          {Carisiswa.map((item, index) => (
             <tr className={`${index % 2 === 0 ?'bg-white' :'bg-gray-300'} border-b border-gray-200 cursor-pointer`} key={index}>
               <td className="px-6 py-4">{index + 1}</td>
-              <td className="px-6 py-4">{item.nama}</td>
-              <td className="px-6 py-4">{item.kelas}</td>
+              <td className="px-6 py-4 capitalize">{item.nama}</td>
+              <td className="px-6 py-4 uppercase">{item.kelas}</td>
               <td className="px-6 py-4">{item.nis}</td>
-              <td className="px-6 py-4">{item.tb}</td>
-              <td className="px-6 py-4">{item.bb}</td>
-              <td className="px-6 py-4">{item.goldar}</td>
+              <td className="px-6 py-4">{item.tinggi_badan}</td>
+              <td className="px-6 py-4">{item.berat_badan}</td>
+              <td className="px-6 py-4">{item.golongan_darah}</td>
               <td className="px-6 py-4 flex">
                 <button onClick={()=>{
                   props.setData(item);
@@ -221,9 +235,9 @@ function Modal(props) {
     { name: "nama", label: "Nama" },
     { name: "kelas", label: "Kelas" },
     { name: "nis", label: "NIS" },
-    { name: "tb", label: "Tinggi Badan" },
-    { name: "bb", label: "Berat Badan" },
-    { name: "goldar", label: "Golongan Darah" }
+    { name: "tinggi_badan", label: "Tinggi Badan" },
+    { name: "berat_badan", label: "Berat Badan" },
+    { name: "golongan_darah", label: "Golongan Darah" }
   ];
 
   const [form, setForm] = useState({});
@@ -251,12 +265,21 @@ function Modal(props) {
                 onChange={handleChange}
               />
             </div>
-          )): (
+          )):props.name === "delete" ?(
             <div className="text-center">Apakah anda yakin ingin mengahapus data <p className={`font-bold`}>{props.data && props.data.nama}</p></div>
-          )}
+          ): props.name === "insert" && fields.map(field => (
+            <div key={field.name}>
+              <label className="text-gray-500">{field.label}</label>
+              <input
+                name={field.name}
+                className="w-full border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in rounded-md p-2"
+                value={""}
+                onChange={handleChange}
+              />
+            </div>))}
         </div>
-        <Button color={props.name === 'edit' ? 'blue-500' :props.name ==='delete' && 'red-500'} textColor="white">
-          {props.name === 'edit' ? 'Simpan' :props.name === 'delete' && 'Hapus'}
+        <Button color={props.name === 'edit' ? 'blue-500' :props.name ==='delete' ? 'red-500' :props.name === 'insert' && 'blue-500'} textColor="white">
+          {props.name === 'edit' ? 'Simpan' :props.name === 'insert' ? 'Tambahkan' : props.name === 'delete' && 'Hapus'}
         </Button>
       </div>
     </div>
