@@ -2,10 +2,10 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require('../config/koneksi.php');
 header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json");
+require('../config/koneksi.php');
 
 $username = $_POST['username'] ?? '';
 $password = $_POST['password'] ?? '';

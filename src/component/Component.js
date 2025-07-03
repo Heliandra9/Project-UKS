@@ -12,13 +12,13 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-function Card(props){
+function Card(props) {
   return (
     <div className={`bg-${props.bgColor} shadow-gray-300 shadow-lg rounded-lg p-4 w-58 ${props.class || ""}`}>
       <div className={`flex flex-col justify-center items-center`}>
         <div>
           <i className={`${props.icon} text-${props.iconColor} text-5xl mr-2`}></i>
-        </div> 
+        </div>
         <div className={`flex flex-col`}>
           <h2 className={`text-${props.text} font-bold text-lg`}>{props.title}</h2>
           <p className={`text-${props.text} font-semibold text-center text-sm`}>{props.description}</p>
@@ -29,9 +29,9 @@ function Card(props){
 }
 function SideBar(props) {
   const items = [
-    { name: "Home", icon: "bi bi-house-door-fill",class:`${props.view === "home" && 'bg-green-900'}` , onClick: ()=>{props.setView("home")} },
-    { name: "Data Siswa", icon: "bi bi-person-fill", class:`${props.view === "siswa" && 'bg-green-900'}` ,onClick: ()=>{props.setView("siswa")} },
-    { name: "Settings", icon: "bi bi-gear-fill" , class:`${props.view === "setting" && 'bg-green-900'}` ,onClick: ()=>{props.setView("setting")}}
+    { name: "Home", icon: "bi bi-house-door-fill", class: `${props.view === "home" && 'bg-green-900'}`, onClick: () => { props.setView("home") } },
+    { name: "Data Siswa", icon: "bi bi-person-fill", class: `${props.view === "siswa" && 'bg-green-900'}`, onClick: () => { props.setView("siswa") } },
+    { name: "Settings", icon: "bi bi-gear-fill", class: `${props.view === "setting" && 'bg-green-900'}`, onClick: () => { props.setView("setting") } }
   ];
 
   const activeNav = items.findIndex(item => item.value === props.view)
@@ -101,15 +101,15 @@ function FormFloating(props) {
 
       {props.text && (
         <label
-        htmlFor={props.name}
-        className={`absolute ${iconColor} text-sm duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 
+          htmlFor={props.name}
+          className={`absolute ${iconColor} text-sm duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white px-2 
         peer-focus:px-2 peer-focus:text-blue-600 
         peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 
         peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 
         rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1`}
-      >
-        <i className={props.icon}></i>&nbsp;{props.text}
-      </label>
+        >
+          <i className={props.icon}></i>&nbsp;{props.text}
+        </label>
 
       )}
       {props.name === "password" && (
@@ -125,64 +125,64 @@ function Button(props) {
   return (
     <button
       onClick={props.onClick}
-      className={`bg-${props.color} cursor-pointer hover:opacity-50 ${props.sizeTxT ? props.sizeTxT :''} ${props.width ? props.width :'w-full'} p-2 text-${props.textColor} font-semibold rounded-sm`}
+      className={`bg-${props.color} cursor-pointer hover:opacity-50 ${props.sizeTxT ? props.sizeTxT : ''} ${props.width ? props.width : 'w-full'} p-2 text-${props.textColor} font-semibold rounded-sm`}
       type={props.type}
     >
       {props.children}
     </button>
   );
 }
-function Chart(){
-const data = {
-  labels: ["Data siswa", "Data obat", "Data kunjungan", "Data surat"],
-  datasets: [
-    {
-      label: "Jumlah",
-      data: [600, 876, 364, 534],
-      backgroundColor: [
-        "rgba(16, 185, 129, 0.7)",
-        "rgba(59, 130, 246, 0.7)",
-        "rgba(234, 179, 8, 0.7)",
-        "rgba(239, 68, 68, 0.7)"
-      ],
-      borderRadius: 8,
-    }
-  ]
-};
+function Chart() {
+  const data = {
+    labels: ["Data siswa", "Data obat", "Data kunjungan", "Data surat"],
+    datasets: [
+      {
+        label: "Jumlah",
+        data: [600, 876, 364, 534],
+        backgroundColor: [
+          "rgba(16, 185, 129, 0.7)",
+          "rgba(59, 130, 246, 0.7)",
+          "rgba(234, 179, 8, 0.7)",
+          "rgba(239, 68, 68, 0.7)"
+        ],
+        borderRadius: 8,
+      }
+    ]
+  };
 
-const options = {
-  responsive: true,
-  plugins: {
-    legend: { display: false },
-    title: { display: true, text: "Statistik UKS" }
-  },
-  scales: {
-    y: { beginAtZero: true }
-  }
-};
-return(
-  <Bar data={data} options={options} className="w-full h-full mt-8" />
-)
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: "Statistik UKS" }
+    },
+    scales: {
+      y: { beginAtZero: true }
+    }
+  };
+  return (
+    <Bar data={data} options={options} className="w-full h-full mt-8" />
+  )
 }
-function Table(props){
+function Table(props) {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost/Project-UKS/backend/proses/tampil_data_siswa.php")
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data_siswa.php")
       .then(response => response.json())
       .then(data => setData(data))
       .catch(error => console.error("Error:", error));
   }, []);
   const Carisiswa = data.filter(item => {
-    if(!props.cari) return true;
+    if (!props.cari) return true;
     const keyword = props.cari.toLowerCase();
-    return(
+    return (
       (item.nama && item.nama.toLowerCase().includes(keyword)) ||
       (item.kelas && item.kelas.toLowerCase().includes(keyword)) ||
       (item.nis && item.nis.toString().includes(keyword))
     )
   })
-  return(
+  return (
     <div className="relative overflow-x-auto w-full rounded-sm">
       <table className="w-full text-sm text-left text-black">
         <thead className="text-xs text-gray-900 uppercase bg-gray-500">
@@ -199,7 +199,7 @@ function Table(props){
         </thead>
         <tbody>
           {Carisiswa.map((item, index) => (
-            <tr className={`${index % 2 === 0 ?'bg-white' :'bg-gray-300'} border-b border-gray-200 cursor-pointer`} key={index}>
+            <tr className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-300'} border-b border-gray-200 cursor-pointer`} key={index}>
               <td className="px-6 py-4">{index + 1}</td>
               <td className="px-6 py-4 capitalize">{item.nama}</td>
               <td className="px-6 py-4 uppercase">{item.kelas}</td>
@@ -208,14 +208,14 @@ function Table(props){
               <td className="px-6 py-4">{item.berat_badan}</td>
               <td className="px-6 py-4">{item.golongan_darah}</td>
               <td className="px-6 py-4 flex">
-                <button onClick={()=>{
+                <button onClick={() => {
                   props.setData(item);
                   props.setM();
                   props.funcName("edit")
                 }} className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-blue-400 bg-blue-500 rounded-lg p-2">
                   <i className="bi bi-pen-fill"></i>&nbsp;Edit
                 </button>
-                <button onClick={()=>{
+                <button onClick={() => {
                   props.setData(item);
                   props.setM();
                   props.funcName("delete")
@@ -241,6 +241,7 @@ function Modal(props) {
   ];
 
   const [form, setForm] = useState({});
+  const [error, setError] = useState({});
 
   useEffect(() => {
     setForm(props.data || {});
@@ -249,6 +250,22 @@ function Modal(props) {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+  const handleSubmit = () => {
+    if (props.name === "edit" || props.name === "insert") {
+      let hasError = false;
+      let newError = {};
+      fields.forEach(field => {
+        if (!form[field.name]) {
+          hasError = true;
+          newError[field.name] = `${field.label} tidak boleh kosong`;
+        }
+      });
+      setError(newError);
+      if (hasError) return; 
+    }
+    props.onSubmit(form);
+  };
+
 
   return (
     <div className={`fixed inset-0 flex items-center justify-center z-50 ${props.stat ? 'block' : 'hidden'} backdrop-blur-sm`}>
@@ -260,26 +277,26 @@ function Modal(props) {
               <label className="text-gray-500">{field.label}</label>
               <input
                 name={field.name}
-                className="w-full  border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in rounded-md p-2"
+                className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in rounded-md p-2`}
                 value={form[field.name] || ""}
                 onChange={handleChange}
               />
             </div>
-          )):props.name === "delete" ?(
+          )) : props.name === "delete" ? (
             <div className="text-center">Apakah anda yakin ingin mengahapus data <p className={`font-bold`}>{props.data && props.data.nama}</p></div>
-          ): props.name === "insert" && fields.map(field => (
+          ) : props.name === "insert" && fields.map(field => (
             <div key={field.name}>
               <label className="text-gray-500">{field.label}</label>
               <input
                 name={field.name}
-                className="w-full border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in rounded-md p-2"
-                value={""}
+                className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in rounded-md p-2`}
+                value={form[field.name] || ""}
                 onChange={handleChange}
               />
             </div>))}
         </div>
-        <Button color={props.name === 'edit' ? 'blue-500' :props.name ==='delete' ? 'red-500' :props.name === 'insert' && 'blue-500'} textColor="white">
-          {props.name === 'edit' ? 'Simpan' :props.name === 'insert' ? 'Tambahkan' : props.name === 'delete' && 'Hapus'}
+        <Button onClick={handleSubmit} color={props.name === 'edit' ? 'blue-500' : props.name === 'delete' ? 'red-500' : props.name === 'insert' && 'blue-500'} textColor="white">
+          {props.name === 'edit' ? 'Simpan' : props.name === 'insert' ? 'Tambahkan' : props.name === 'delete' && 'Hapus'}
         </Button>
       </div>
     </div>
