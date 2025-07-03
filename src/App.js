@@ -16,7 +16,7 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost/pkl/Project-UKS/backend/proses/login.php", {
+      const response = await fetch("http://localhost/Project-UKS/backend/proses/login.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`

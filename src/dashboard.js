@@ -3,7 +3,7 @@ import { Button, SideBar } from "./component/Component";
 import logo from "./component/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.png";
 import Home from "./view/home";
 import Siswa from "./view/data_siswa";
-import Setting from "./view/setting";
+import Obat from "./view/data_obat";
 import { useNavigate } from "react-router-dom";
 import './App.css'
 
@@ -13,9 +13,10 @@ function Dashboard() {
     const [nav , setNav] = useState(false);
     const [hober, setHober] = useState(true);
     const [modal, setModal] = useState(false);
-    const [view, setView] = useState(localStorage.getItem("view"));
-    
-    const page = localStorage.getItem("view", view);
+    const [view, setView] = useState(localStorage.getItem("view") || "home");
+    useEffect(() => {
+        localStorage.setItem("view", view);
+    }, [view]);
     const funcSearchSiswa = (e) => {
         setSearchSiswa(e.target.value);
     }
@@ -61,10 +62,10 @@ function Dashboard() {
                     </div>
                     {view === "home" ?
                      <h1 className="text-2xl font-bold ml-4 text-gray-700">Dashboard</h1>:
-                     view === "siswa" && (
+                     (view === "siswa" || view === "obat") && (
                         <div className={`flex ml-6 w-full mr-40`}>
                             <input onKeyUp={funcSearchSiswa} placeholder={`Cari data siswa`} className={`bg-white w-full shadow-md focus:outline-0 px-2 rounded-sm`}/>
-                            {view === "siswa" && <Button onClick={funcModalInsert} width="w-1/6 ml-8" color="blue-500" sizeTxT="text-sm" textColor="white">+&nbsp;Tambah&nbsp;data</Button>}
+                            {(view === "siswa" || view === "obat") && <Button onClick={funcModalInsert} width="w-1/6 ml-8" color="blue-500" sizeTxT="text-sm" textColor="white">+&nbsp;Tambah&nbsp;data</Button>}
                         </div>
                      )
                      }
@@ -77,15 +78,26 @@ function Dashboard() {
                     
                 </div>
                 <div className="w-full h-full bg-white rounded-lg p-4 shadow-lg">
-                    {view === "home"  ? <Home /> :view === "siswa" ? <Siswa
-  modalName={modalName}
-  setModalName={setModalName}
-  modal={modalInsert}
-  setModal={setModalInsert}
-  data={data}
-  setData={setData}
-  cari={searchSiswa}
-/> :view === "setting" && <Setting/>}
+                    {view === "home"  ? <Home /> :
+                    view === "siswa" ? <Siswa
+                    modalName={modalName}
+                    setModalName={setModalName}
+                    modal={modalInsert}
+                    setModal={setModalInsert}
+                    data={data}
+                    setData={setData}
+                    cari={searchSiswa}
+                    /> :
+                    view === "obat" &&                         
+                    <Obat
+                        modalName={modalName}
+                        setModalName={setModalName}
+                        modal={modalInsert}
+                        setModal={setModalInsert}
+                        data={data}
+                        setData={setData}
+                        cari={searchSiswa}
+                    />}
                 </div>
             </div>
         </div>
