@@ -8,11 +8,18 @@ function Siswa(props) {
   const [siswa, setSiswa] = useState([]);
 
   const getDataSiswa = () => {
-    fetch("http://localhost/Project-UKS/backend/proses/tampil_data_siswa.php")
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=siswa")
       .then(res => res.json())
-      .then(data => setSiswa(data))
+      .then(data => {
+        console.log("DATA SISWA:", data); // Tambahkan ini
+        setSiswa(data);
+      })
       .catch(err => console.error("Gagal ambil data siswa:", err));
   };
+
+  useEffect(() => {
+    getDataSiswa();
+  }, []);
 
 
   const funcModal = () => {
@@ -30,6 +37,7 @@ function Siswa(props) {
         setData={props.setData}
         data={siswa}
         name="data_siswa"
+        view={props.view} // <-- tambahkan ini
       />
       <Modal
         setM={funcModal}
@@ -51,11 +59,11 @@ function Siswa(props) {
 
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/Project-UKS/backend/proses/proses_tambah.php";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=siswa";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/Project-UKS/backend/proses/proses_edit.php";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php";
           } else if (props.modalName === "delete") {
-            endpoint = "http://localhost/Project-UKS/backend/proses/proses_hapus.php";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php?type=siswa";
             // Untuk hapus, biasanya hanya perlu kirim NIS
             formBody.delete("nis");
             formBody.delete("nama");
@@ -85,6 +93,7 @@ function Siswa(props) {
               console.error("Error:", err);
             });
         }}
+        view={props.view} // <-- tambahkan ini
       />
     </div>
   );

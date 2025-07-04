@@ -29,9 +29,9 @@ function Card(props) {
 }
 function SideBar(props) {
   const items = [
-    { name: "Home", icon: "bi bi-house-door-fill", class: `${props.view === "home" && 'bg-green-900'}`, onClick: () => { props.setView("home") } },
-    { name: "Data Siswa", icon: "bi bi-person-fill", class: `${props.view === "siswa" && 'bg-green-900'}`, onClick: () => { props.setView("siswa") } },
-    { name: "Data Obat", icon: "bi bi-capsule", class: `${props.view === "obat" && 'bg-green-900'}`, onClick: () => { props.setView("obat") } }
+    { name: "Home", icon: "bi bi-house-door-fill", class: props.view === "home" ? 'bg-green-900' : '', onClick: () => { props.setView("home") } },
+    { name: "Data Siswa", icon: "bi bi-person-fill", class: props.view === "siswa" ? 'bg-green-900' : '', onClick: () => { props.setView("siswa") } },
+    { name: "Data Obat", icon: "bi bi-capsule", class: props.view === "obat" ? 'bg-green-900' : '', onClick: () => { props.setView("obat") } }
   ];
 
   const activeNav = items.findIndex(item => item.value === props.view)
@@ -165,52 +165,45 @@ function Chart() {
   )
 }
 function Table(props) {
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    fetch(`${props.name === 'data_siswa' ? 'http://localhost/Project-UKS/backend/proses/tampil_data_siswa.php' : 'http://localhost/Project-UKS/backend/proses/tampil_data_obat.php'}`)
-      .then(response => response.json())
-      .then(data => setData(data))
-      .catch(error => console.error("Error:", error));
-  }, []);
-  const Cari = data.filter(item => {
+  // Gunakan data dari props, bukan fetch ulang
+  const Cari = (props.data || []).filter(item => {
     if (!props.cari) return true;
     const keyword = props.cari.toLowerCase();
-    return (localStorage.getItem("view") === "siswa" ?(
+    return (props.view === "siswa" ? (
       (item.nama && item.nama.toLowerCase().includes(keyword)) ||
       (item.kelas && item.kelas.toLowerCase().includes(keyword)) ||
-      (item.nis && item.nis.toString().includes(keyword))):(
+      (item.nis && item.nis.toString().includes(keyword))
+    ) : (
       (item.nama_obat && item.nama_obat.toLowerCase().includes(keyword)) ||
       (item.kode_obat && item.kode_obat.toLowerCase().includes(keyword)) ||
-      (item.kode && item.kandungan.toLowerCase().includes(keyword)) ||
+      (item.kandungan && item.kandungan.toLowerCase().includes(keyword)) ||
       (item.jenis_obat && item.jenis_obat.toLowerCase().includes(keyword))
-      )
-    )
+    ));
   })
   return (
     <div className="relative overflow-x-auto w-full rounded-sm">
       <table className="w-full text-sm text-left text-black">
         <thead className="text-xs text-gray-900 uppercase bg-gray-500">
           <tr>
-            {localStorage.getItem("view") === "siswa" ? (
+            {props.view === "siswa" ? (
               <>
                 <th scope="col" className="px-6 py-3">No</th>
-            <th scope="col" className="px-6 py-3">Nama Lengkap</th>
-            <th scope="col" className="px-6 py-3">Kelas</th>
-            <th scope="col" className="px-6 py-3">NIS</th>
-            <th scope="col" className="px-6 py-3">Tinggi&nbsp;Badan</th>
-            <th scope="col" className="px-6 py-3">Berat&nbsp;Badan</th>
-            <th scope="col" className="px-6 py-3">Golongan&nbsp;Darah</th>
-            <th scope="col" className="px-6 py-3">Aksi</th>
+                <th scope="col" className="px-6 py-3">Nama Lengkap</th>
+                <th scope="col" className="px-6 py-3">Kelas</th>
+                <th scope="col" className="px-6 py-3">NIS</th>
+                <th scope="col" className="px-6 py-3">Tinggi&nbsp;Badan</th>
+                <th scope="col" className="px-6 py-3">Berat&nbsp;Badan</th>
+                <th scope="col" className="px-6 py-3">Golongan&nbsp;Darah</th>
+                <th scope="col" className="px-6 py-3">Aksi</th>
               </>) : (
               <>
                 <th scope="col" className="px-6 py-3">No</th>
-            <th scope="col" className="px-6 py-3">Nama Obat</th>
-            <th scope="col" className="px-6 py-3">Kode Obat</th>
-            <th scope="col" className="px-6 py-3">Jenis Obat</th>
-            <th scope="col" className="px-6 py-3">Kandungan Obat</th>
-            <th scope="col" className="px-6 py-3">Stock Obat</th>
-            <th scope="col" className="px-6 py-3">Aksi</th>
+                <th scope="col" className="px-6 py-3">Nama Obat</th>
+                <th scope="col" className="px-6 py-3">Kode Obat</th>
+                <th scope="col" className="px-6 py-3">Jenis Obat</th>
+                <th scope="col" className="px-6 py-3">Kandungan Obat</th>
+                <th scope="col" className="px-6 py-3">Stock Obat</th>
+                <th scope="col" className="px-6 py-3">Aksi</th>
               </>
             )}
           </tr>
@@ -219,19 +212,21 @@ function Table(props) {
           {Cari.map((item, index) => (
             <tr className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-300'} border-b border-gray-200 cursor-pointer`} key={index}>
               <td className="px-6 py-4">{index + 1}</td>
-              {localStorage.getItem("view") === "siswa" ? (
-              <><td className="px-6 py-4 capitalize">{item.nama}</td>
-              <td className="px-6 py-4 uppercase">{item.kelas}</td>
-              <td className="px-6 py-4">{item.nis}</td>
-              <td className="px-6 py-4">{item.tinggi_badan}</td>
-              <td className="px-6 py-4">{item.berat_badan}</td>
-              <td className="px-6 py-4">{item.golongan_darah}</td></>):(
+              {props.view === "siswa" ? (
                 <>
-                <td className="px-6 py-4 capitalize">{item.nama_obat}</td>
-                <td className="px-6 py-4 uppercase">{item.kode_obat}</td>
-                <td className="px-6 py-4">{item.jenis_obat}</td>
-                <td className="px-6 py-4">{item.kandungan}</td>
-                <td className="px-6 py-4">{item.stock_obat}</td>
+                  <td className="px-6 py-4 capitalize">{item.nama}</td>
+                  <td className="px-6 py-4 uppercase">{item.kelas}</td>
+                  <td className="px-6 py-4">{item.nis}</td>
+                  <td className="px-6 py-4">{item.tinggi_badan}</td>
+                  <td className="px-6 py-4">{item.berat_badan}</td>
+                  <td className="px-6 py-4">{item.golongan_darah}</td>
+                </>) : (
+                <>
+                  <td className="px-6 py-4 capitalize">{item.nama_obat}</td>
+                  <td className="px-6 py-4 uppercase">{item.kode_obat}</td>
+                  <td className="px-6 py-4">{item.jenis_obat}</td>
+                  <td className="px-6 py-4">{item.kandungan}</td>
+                  <td className="px-6 py-4">{item.stock_obat}</td>
                 </>
               )}
               <td className="px-6 py-4 flex">
@@ -258,8 +253,8 @@ function Table(props) {
   )
 }
 function Modal(props) {
-  const fields = localStorage.getItem("view") === "siswa"
-  ? [
+  const fields = props.view === "siswa"
+    ? [
       { name: "nama", label: "Nama" },
       { name: "kelas", label: "Kelas" },
       { name: "nis", label: "NIS" },
@@ -267,13 +262,13 @@ function Modal(props) {
       { name: "berat_badan", label: "Berat Badan" },
       { name: "golongan_darah", label: "Golongan Darah" }
     ]
-  : [
+    : [
       { name: "nama_obat", label: "Nama Obat" },
       { name: "kode_obat", label: "Kode Obat" },
       { name: "kandungan", label: "Kandungan Obat" },
       { name: "stock_obat", label: "Stock Obat" },
       { name: "jenis_obat", label: "Jenis Obat" }
-  ];
+    ];
 
   const [form, setForm] = useState({});
   const [error, setError] = useState({});
@@ -296,7 +291,7 @@ function Modal(props) {
         }
       });
       setError(newError);
-      if (hasError) return; 
+      if (hasError) return;
     }
     props.onSubmit(form);
   };
@@ -308,92 +303,92 @@ function Modal(props) {
         <h2 className="text-xl font-bold mb-4">{props.title}</h2>
         <div className="flex flex-col gap-2 mb-4"><i onClick={props.setM} className={`bi bi-x-lg absolute top-6 right-6 cursor-pointer`}></i>
           {props.name === "edit" ? fields.map(field => (
-  <div key={field.name}>
-    <label className="text-gray-500">{field.label}</label>
-    {field.name === "golongan_darah" ? (
-      <select
-        name={field.name}
-        className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
-        value={form[field.name] || ""}
-        onChange={handleChange}
-      >
-        <option disabled value="">Pilih Golongan Darah</option>
-        <option value="A">A</option>
-        <option value="A-">A-</option>
-        <option value="B">B</option>
-        <option value="B-">B-</option>
-        <option value="AB">AB</option>
-        <option value="AB-">AB-</option>
-        <option value="O">O</option>
-        <option value="O-">O-</option>
-      </select>
-    ):field.name === 'jenis_obat' ?(
-      <select
-        name={field.name}
-        className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
-        value={form[field.name] || ""}
-        onChange={handleChange}
-      >
-        <option disabled value="">Pilih Jenis Obat</option>
-        <option value="Tablet">Tablet</option>
-        <option value="Sirup">Sirup</option>
-        <option value="Kapsul">Kapsul</option>
-        <option value="Salep">Salep</option>
-      </select>
-    )  : (
-      <input
-        name={field.name}
-        className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
-        value={form[field.name] || ""}
-        onChange={handleChange}
-      />
-    )}
-  </div>
-)) : props.name === "delete" ? (
-  <div className="text-center">Apakah anda yakin ingin mengahapus data <p className={`font-bold`}>{props.data && (props.data.nama || props.data.nama_obat)}</p></div>
-) : props.name === "insert" && fields.map(field => (
-  <div key={field.name}>
-    <label className="text-gray-500">{field.label}</label>
-    {field.name === "golongan_darah" ? (
-      <select
-        name={field.name}
-        className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
-        value={form[field.name] || ""}
-        onChange={handleChange}
-      >
-        <option disabled value="">Pilih Golongan Darah</option>
-        <option value="A+">A+</option>
-        <option value="A-">A-</option>
-        <option value="B+">B+</option>
-        <option value="B-">B-</option>
-        <option value="AB+">AB+</option>
-        <option value="AB-">AB-</option>
-        <option value="O+">O+</option>
-        <option value="O-">O-</option>
-      </select>
-    ):field.name === 'jenis_obat' ?(
-      <select
-        name={field.name}
-        className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
-        value={form[field.name] || ""}
-        onChange={handleChange}
-      >
-        <option disabled selected value="">Pilih Jenis Obat</option>
-        <option value="Tablet">Tablet</option>
-        <option value="Sirup">Sirup</option>
-        <option value="Kapsul">Kapsul</option>
-        <option value="Salep">Salep</option>
-      </select>
-    ) : (
-      <input
-        name={field.name}
-        className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
-        value={form[field.name] || ""}
-        onChange={handleChange}
-      />
-    )}
-  </div>
-))}
+            <div key={field.name}>
+              <label className="text-gray-500">{field.label}</label>
+              {field.name === "golongan_darah" ? (
+                <select
+                  name={field.name}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                >
+                  <option disabled value="">Pilih Golongan Darah</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              ) : field.name === 'jenis_obat' ? (
+                <select
+                  name={field.name}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                >
+                  <option disabled value="">Pilih Jenis Obat</option>
+                  <option value="Tablet">Tablet</option>
+                  <option value="Sirup">Sirup</option>
+                  <option value="Kapsul">Kapsul</option>
+                  <option value="Salep">Salep</option>
+                </select>
+              ) : (
+                <input
+                  name={field.name}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                />
+              )}
+            </div>
+          )) : props.name === "delete" ? (
+            <div className="text-center">Apakah anda yakin ingin mengahapus data <p className={`font-bold`}>{props.data && (props.data.nama || props.data.nama_obat)}</p></div>
+          ) : props.name === "insert" && fields.map(field => (
+            <div key={field.name}>
+              <label className="text-gray-500">{field.label}</label>
+              {field.name === "golongan_darah" ? (
+                <select
+                  name={field.name}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                >
+                  <option disabled value="">Pilih Golongan Darah</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              ) : field.name === 'jenis_obat' ? (
+                <select
+                  name={field.name}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                >
+                  <option disabled selected value="">Pilih Jenis Obat</option>
+                  <option value="Tablet">Tablet</option>
+                  <option value="Sirup">Sirup</option>
+                  <option value="Kapsul">Kapsul</option>
+                  <option value="Salep">Salep</option>
+                </select>
+              ) : (
+                <input
+                  name={field.name}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                />
+              )}
+            </div>
+          ))}
         </div>
         <Button onClick={handleSubmit} color={props.name === 'edit' ? 'blue-500' : props.name === 'delete' ? 'red-500' : props.name === 'insert' && 'blue-500'} textColor="white">
           {props.name === 'edit' ? 'Simpan' : props.name === 'insert' ? 'Tambahkan' : props.name === 'delete' && 'Hapus'}
