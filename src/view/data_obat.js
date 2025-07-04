@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {Table, Modal} from "../component/Component";
-
+import Swal from 'sweetalert2';
 
 function Obat(props){
       const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
@@ -76,13 +76,30 @@ function Obat(props){
             body: formBody.toString()
           })
           .then(res => res.json())
-          .then(data => {
-            console.log("Response:", data);
-            if (data.status === "success") {
-              getDataObat(); // Refresh data obat setelah operasi sukses
-              funcModal();
+          .then(result => {
+            if (result.status === "success") {
+              Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: props.modalName === 'edit'
+                  ? 'Data berhasil diubah'
+                  : props.modalName === 'delete'
+                    ? 'Data berhasil dihapus'
+                    : 'Data berhasil ditambahkan',
+                timer: 1500,
+                showConfirmButton: false
+              });
+              // Refresh data dan tutup modal
+
+              getDataObat && getDataObat();
+              props.setModal(false);
             } else {
-              console.error("Error:", data.message);
+              Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: result.message || 'Terjadi kesalahan',
+                showConfirmButton: true
+              });
             }
           })
           .catch(err => console.error("Fetch error:", err));  

@@ -1,5 +1,6 @@
 import { Table, Modal } from "../component/Component";
 import { useState, useEffect } from "react";
+import Swal from 'sweetalert2';
 
 
 function Siswa(props) {
@@ -84,9 +85,27 @@ function Siswa(props) {
             .then((res) => res.json())
             .then((result) => {
               if (result.status === "success") {
-                getDataSiswa();
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Berhasil!',
+                  text: props.name === 'edit'
+                    ? 'Data berhasil diubah'
+                    : props.name === 'delete'
+                      ? 'Data berhasil dihapus'
+                      : 'Data berhasil ditambahkan',
+                  timer: 1500,
+                  showConfirmButton: false
+                });
+                // Refresh data dan tutup modal
+                getDataSiswa && getDataSiswa();
                 props.setModal(false);
-                window.location.reload();
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Gagal!',
+                  text: result.message || 'Terjadi kesalahan',
+                  showConfirmButton: true
+                });
               }
             })
             .catch((err) => {

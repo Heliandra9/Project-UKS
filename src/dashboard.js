@@ -6,6 +6,7 @@ import Siswa from "./view/data_siswa";
 import Obat from "./view/data_obat";
 import { useNavigate } from "react-router-dom";
 import './App.css'
+import Swal from 'sweetalert2';
 
 function Dashboard() {
     const navigate = useNavigate();
@@ -37,6 +38,7 @@ function Dashboard() {
     const logot = () => {
         localStorage.setItem("isLogin", "false");
         localStorage.removeItem("username");
+        localStorage.setItem("showLogoutSuccess", "true");
         navigate("/");
     }
     const [modalName, setModalName] = useState("");
@@ -48,6 +50,20 @@ function Dashboard() {
         setData({});
         setModalInsert(true);
     };
+
+    useEffect(() => {
+        if (localStorage.getItem("showLoginSuccess") === "true") {
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Berhasil!',
+                text: 'Selamat datang!',
+                timer: 1500,
+                showConfirmButton: false
+            });
+            localStorage.removeItem("showLoginSuccess");
+        }
+    }, []);
+
     return (
         <div className="w-full h-full flex px-4 py-2 justify-center items-center bg-gray-300">
             <div
