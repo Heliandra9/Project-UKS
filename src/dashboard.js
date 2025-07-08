@@ -67,8 +67,8 @@ function Dashboard() {
     return (
         <div className="w-full h-full flex px-4 py-2 justify-center items-center bg-gray-300">
             <div
-                onMouseEnter={() => setHober(true)}
-                onMouseLeave={() => setHober(false)}
+                onMouseEnter={() => setHober(!hober)}
+                onMouseLeave={() => setHober(!hober)}
                 className={`${nav && hober ? 'sm:w-16 w-full' : 'sm:w-1/6 w-full'} z-100 sm:h-screen shadow-black shadow-lg transition-all duration-300 ease-in-out absolute sm:fixed top-0 left-0`}
             >
                 <SideBar
