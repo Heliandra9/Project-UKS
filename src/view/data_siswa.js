@@ -9,7 +9,7 @@ function Siswa(props) {
   const [siswa, setSiswa] = useState([]);
 
   const getDataSiswa = () => {
-    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=siswa")
+    fetch("http://localhost/Project-UKS/backend/proses/tampil_data.php?type=siswa")
       .then(res => res.json())
       .then(data => {
         console.log("DATA SISWA:", data); // Tambahkan ini
@@ -60,11 +60,11 @@ function Siswa(props) {
 
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=siswa";
+            endpoint = "http://localhost/Project-UKS/backend/proses/proses_tambah.php?type=siswa";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php";
+            endpoint = "http://localhost/Project-UKS/backend/proses/proses_edit.php";
           } else if (props.modalName === "delete") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php?type=siswa";
+            endpoint = "http://localhost/Project-UKS/backend/proses/proses_hapus.php?type=siswa";
             // Untuk hapus, biasanya hanya perlu kirim NIS
             formBody.delete("nis");
             formBody.delete("nama");
