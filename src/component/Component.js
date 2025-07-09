@@ -29,9 +29,10 @@ function Card(props) {
 }
 function SideBar(props) {
   const items = [
-    { name: "Home", icon: "bi bi-house-door-fill", class: props.view === "home" ? 'bg-green-900' : '', onClick: () => { props.setView("home") } },
-    { name: "Data Siswa", icon: "bi bi-person-fill", class: props.view === "siswa" ? 'bg-green-900' : '', onClick: () => { props.setView("siswa") } },
-    { name: "Data Obat", icon: "bi bi-capsule", class: props.view === "obat" ? 'bg-green-900' : '', onClick: () => { props.setView("obat") } }
+    { name: "Beranda", icon: "bi bi-house-door-fill", class: props.view === "home" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("home") } },
+    { name: "Data Siswa", icon: "bi bi-person-fill", class: props.view === "siswa" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("siswa") } },
+    { name: "Data Obat", icon: "bi bi-capsule", class: props.view === "obat" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("obat") } },
+    { name: "Daftar Kunjungan", icon: "bi bi-card-list", class: props.view === "kunjungan" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("kunjungan") } }
   ];
 
   const activeNav = items.findIndex(item => item.value === props.view)
@@ -65,7 +66,7 @@ function SideBar(props) {
           {items.map((item, index) => (
             <li
               key={index}
-              className={`flex z-10 items-center p-2 hover:bg-green-600 rounded-lg cursor-pointer ${item.class || ""}`}
+              className={`flex z-10 items-center p-2 rounded-lg cursor-pointer transition-all duration-300 ease-in-out border-0 border-green-500 ${item.class || ""}`}
               onClick={item.onClick}
             >
               <i className={`${item.icon} mr-2 ${props.nav && props.hober ? 'absolute right-0' : ''}`}></i>
@@ -134,7 +135,7 @@ function Button(props) {
 }
 function Chart() {
   const data = {
-    labels: ["Data siswa", "Data obat", "Data kunjungan", "Data surat"],
+    labels: ["Data siswa", "Data obat", "Daftar kunjungan", "Data surat"],
     datasets: [
       {
         label: "Jumlah",
@@ -165,7 +166,6 @@ function Chart() {
   )
 }
 function Table(props) {
-  // Gunakan data dari props, bukan fetch ulang
   const Cari = (props.data || []).filter(item => {
     if (!props.cari) return true;
     const keyword = props.cari.toLowerCase();
@@ -173,12 +173,17 @@ function Table(props) {
       (item.nama && item.nama.toLowerCase().includes(keyword)) ||
       (item.kelas && item.kelas.toLowerCase().includes(keyword)) ||
       (item.nis && item.nis.toString().includes(keyword))
-    ) : (
+    ) :props.view === "obat" ? (
       (item.nama_obat && item.nama_obat.toLowerCase().includes(keyword)) ||
       (item.kode_obat && item.kode_obat.toLowerCase().includes(keyword)) ||
       (item.kandungan && item.kandungan.toLowerCase().includes(keyword)) ||
       (item.jenis_obat && item.jenis_obat.toLowerCase().includes(keyword))
-    ));
+    ):props.view === "kunjungan" ? (
+      (item.nama && item.nama.toLowerCase().includes(keyword)) ||
+      (item.kelas && item.kelas.toLowerCase().includes(keyword)) ||
+      (item.tanggal && item.tanggal.toLowerCase().includes(keyword)) ||
+      (item.keterangan && item.keterangan.toLowerCase().includes(keyword))
+    ): '');
   })
   return (
     <div className="relative overflow-x-auto w-full rounded-sm">
@@ -195,7 +200,7 @@ function Table(props) {
                 <th scope="col" className="px-6 py-3">Berat&nbsp;Badan</th>
                 <th scope="col" className="px-6 py-3">Golongan&nbsp;Darah</th>
                 <th scope="col" className="px-6 py-3">Aksi</th>
-              </>) : (
+              </>) :props.view === "obat" ? (
               <>
                 <th scope="col" className="px-6 py-3">No</th>
                 <th scope="col" className="px-6 py-3">Nama Obat</th>
@@ -205,48 +210,72 @@ function Table(props) {
                 <th scope="col" className="px-6 py-3">Stock Obat</th>
                 <th scope="col" className="px-6 py-3">Aksi</th>
               </>
-            )}
+            ): props.view === "kunjungan" ? (
+              <>
+                <th scope="col" className="px-6 py-3">No</th>
+                <th scope="col" className="px-6 py-3">Nama</th>
+                <th scope="col" className="px-6 py-3">Kelas</th>
+                <th scope="col" className="px-6 py-3">Tanggal</th>
+                <th scope="col" className="px-6 py-3">Keterangan</th>
+                <th scope="col" className="px-6 py-3">Aksi</th>
+              </>
+            ) : ''}
           </tr>
         </thead>
         <tbody>
-          {Cari.map((item, index) => (
-            <tr className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-300'} border-b border-gray-200 cursor-pointer`} key={index}>
-              <td className="px-6 py-4">{index + 1}</td>
-              {props.view === "siswa" ? (
-                <>
-                  <td className="px-6 py-4 capitalize">{item.nama}</td>
-                  <td className="px-6 py-4 uppercase">{item.kelas}</td>
-                  <td className="px-6 py-4">{item.nis}</td>
-                  <td className="px-6 py-4">{item.tinggi_badan}</td>
-                  <td className="px-6 py-4">{item.berat_badan}</td>
-                  <td className="px-6 py-4">{item.golongan_darah}</td>
-                </>) : (
-                <>
-                  <td className="px-6 py-4 capitalize">{item.nama_obat}</td>
-                  <td className="px-6 py-4 uppercase">{item.kode_obat}</td>
-                  <td className="px-6 py-4">{item.jenis_obat}</td>
-                  <td className="px-6 py-4">{item.kandungan}</td>
-                  <td className="px-6 py-4">{item.stock_obat}</td>
-                </>
-              )}
-              <td className="px-6 py-4 flex">
-                <button onClick={() => {
-                  props.setData(item);
-                  props.setM();
-                  props.funcName("edit")
-                }} className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-blue-400 bg-blue-500 rounded-lg p-2">
-                  <i className="bi bi-pen-fill"></i>&nbsp;Edit
-                </button>
-                <button onClick={() => {
-                  props.setData(item);
-                  props.setM();
-                  props.funcName("delete")
-                }} className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-red-400 bg-red-500 rounded-lg p-2 ml-2">
-                  <i className="bi bi-trash-fill"></i>&nbsp;Hapus
-                </button>
+          {Cari.length === 0 ? (
+            <tr>
+              <td colSpan={props.view === "siswa" ? 8 : props.view === "obat" ? 7 : props.view === "kunjungan" ? 6 : 1} className="text-center py-4">
+                Data tidak ada
               </td>
             </tr>
-          ))}
+          ) : (
+            Cari.map((item, index) => (
+              <tr className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-300'} border-b border-gray-200`} key={index}>
+                <td className="px-6 py-4">{index + 1}</td>
+                {props.view === "siswa" ? (
+                  <>
+                    <td className="px-6 py-4 capitalize">{item.nama}</td>
+                    <td className="px-6 py-4 uppercase">{item.kelas}</td>
+                    <td className="px-6 py-4">{item.nis}</td>
+                    <td className="px-6 py-4">{item.tinggi_badan}</td>
+                    <td className="px-6 py-4">{item.berat_badan}</td>
+                    <td className="px-6 py-4">{item.golongan_darah}</td>
+                  </>) : props.view === "obat" ? (
+                  <>
+                    <td className="px-6 py-4 capitalize">{item.nama_obat}</td>
+                    <td className="px-6 py-4 uppercase">{item.kode_obat}</td>
+                    <td className="px-6 py-4">{item.jenis_obat}</td>
+                    <td className="px-6 py-4">{item.kandungan}</td>
+                    <td className="px-6 py-4">{item.stock_obat}</td>
+                  </>
+                ): props.view === "kunjungan" ? (
+                  <>
+                    <td className="px-6 py-4 capitalize">{item.nama}</td>
+                    <td className="px-6 py-4 uppercase">{item.kelas}</td>
+                    <td className="px-6 py-4">{item.tanggal}</td>
+                    <td className="px-6 py-4">{item.keterangan}</td>
+                  </>
+                ) : ''}
+                <td className="px-6 py-4 flex">
+                  <button onClick={() => {
+                    props.setData(item);
+                    props.setM();
+                    props.funcName("edit")
+                  }} className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-blue-400 bg-blue-500 rounded-lg p-2">
+                    <i className="bi bi-pen-fill"></i>&nbsp;Edit
+                  </button>
+                  <button onClick={() => {
+                    props.setData(item);
+                    props.setM();
+                    props.funcName("delete")
+                  }} className="text-white hover:shadow-lg hover:shadow-gray-300 transition-all duration-300 ease-in-out hover:bg-red-400 bg-red-500 rounded-lg p-2 ml-2">
+                    <i className="bi bi-trash-fill"></i>&nbsp;Hapus
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
@@ -262,13 +291,18 @@ function Modal(props) {
       { name: "berat_badan", label: "Berat Badan" },
       { name: "golongan_darah", label: "Golongan Darah" }
     ]
-    : [
+    :props.view === "obat" ? [
       { name: "nama_obat", label: "Nama Obat" },
       { name: "kode_obat", label: "Kode Obat" },
       { name: "kandungan", label: "Kandungan Obat" },
       { name: "stock_obat", label: "Stock Obat" },
       { name: "jenis_obat", label: "Jenis Obat" }
-    ];
+    ]: props.view === "kunjungan" ? [
+      { name: "nama", label: "Nama" },
+      { name: "kelas", label: "Kelas" },
+      { name: "tanggal", label: "Tanggal" },
+      { name: "keterangan", label: "Keterangan" }
+    ] : [];
 
   const [form, setForm] = useState({});
   const [error, setError] = useState({});
@@ -308,7 +342,7 @@ function Modal(props) {
               {field.name === "golongan_darah" ? (
                 <select
                   name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
                   value={form[field.name] || ""}
                   onChange={handleChange}
                 >
@@ -325,7 +359,7 @@ function Modal(props) {
               ) : field.name === 'jenis_obat' ? (
                 <select
                   name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
                   value={form[field.name] || ""}
                   onChange={handleChange}
                 >
@@ -335,10 +369,18 @@ function Modal(props) {
                   <option value="Kapsul">Kapsul</option>
                   <option value="Salep">Salep</option>
                 </select>
+              ):field.name === "tanggal"? (
+                <input
+                  type="date"
+                  name={field.name}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                />
               ) : (
                 <input
                   name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
                   value={form[field.name] || ""}
                   onChange={handleChange}
                 />
@@ -352,7 +394,7 @@ function Modal(props) {
               {field.name === "golongan_darah" ? (
                 <select
                   name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
                   value={form[field.name] || ""}
                   onChange={handleChange}
                 >
@@ -369,7 +411,7 @@ function Modal(props) {
               ) : field.name === 'jenis_obat' ? (
                 <select
                   name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
                   value={form[field.name] || ""}
                   onChange={handleChange}
                 >
@@ -379,10 +421,18 @@ function Modal(props) {
                   <option value="Kapsul">Kapsul</option>
                   <option value="Salep">Salep</option>
                 </select>
+              ):field.name === "tanggal"? (
+                <input
+                  type="date"
+                  name={field.name}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                />
               ) : (
                 <input
                   name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:border-b-2 focus:text-blue-500 transition-all duration-1000 ease-in p-2`}
+                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
                   value={form[field.name] || ""}
                   onChange={handleChange}
                 />

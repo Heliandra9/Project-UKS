@@ -2,21 +2,21 @@ import { useState, useEffect } from "react";
 import {Table, Modal} from "../component/Component";
 import Swal from 'sweetalert2';
 
-function Obat(props){
+function Kunjungan(props){
       const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
       const [data, setData] = useState("");
       const [siswa, setSiswa] = useState([]);
 
-      const getDataObat = () => {
-        fetch("http://localhost/Project-UKS/backend/proses/tampil_data.php?type=obat")
+      const getDataKunjungan = () => {
+        fetch("http://localhost/Project-UKS/backend/proses/tampil_data.php?type=kunjungan")
           .then(res => res.json())
           .then(data => {
             setSiswa(data);
           })
-          .catch(err => console.error("Gagal ambil data obat:", err));
+          .catch(err => console.error("Gagal ambil data kunjungan:", err));
       }
       useEffect(() => {
-        getDataObat();
+        getDataKunjungan();
       }, []);
     
       const funcModal = () => {
@@ -32,7 +32,7 @@ function Obat(props){
         funcName={props.setModalName}
         setData={props.setData}
         data={siswa}
-        name="data_obat"
+        name="data_kunjungan"
         view={props.view}
       />
       <Modal
@@ -41,10 +41,10 @@ function Obat(props){
         data={props.data}
         title={
           props.modalName === 'edit'
-            ? 'Edit data obat'
+            ? 'Edit data kunjungan'
             : props.modalName === 'delete'
-              ? 'Hapus data obat'
-              : props.modalName === 'insert' && 'Tambah data obat'
+              ? 'Hapus data kunjungan'
+              : props.modalName === 'insert' && 'Tambah data kunjungan'
         }
         stat={props.modal}
         onSubmit={(form) => {
@@ -55,19 +55,19 @@ function Obat(props){
 
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/Project-UKS/backend/proses/proses_tambah.php?type=obat";
+            endpoint = "http://localhost/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan";
           } else if (props.modalName === "edit") {
             endpoint = "http://localhost/Project-UKS/backend/proses/proses_edit.php";
           } else if (props.modalName === "delete") {
-            endpoint = "http://localhost/Project-UKS/backend/proses/proses_hapus.php?type=obat";
-            formBody.delete("kode_obat");
-            formBody.delete("nama_obat");
-            formBody.delete("jenis_obat");
+            endpoint = "http://localhost/Project-UKS/backend/proses/proses_hapus.php?type=kunjungan";
+            formBody.delete("kode_kunjungan");
+            formBody.delete("nama_kunjungan");
+            formBody.delete("jenis_kunjungan");
             formBody.delete("kandungan");
-            formBody.delete("stock_obat");
+            formBody.delete("stock_kunjungan");
             formBody.append("id", props.data.id);
           }
-          formBody.append("type", "obat");
+          formBody.append("type", "kunjungan");
 
 
           fetch(endpoint, {
@@ -95,9 +95,9 @@ function Obat(props){
                 timer: 1500,
                 showConfirmButton: false
               });
-              
+              // Refresh data dan tutup modal
 
-              getDataObat && getDataObat();
+              getDataKunjungan && getDataKunjungan();
               props.setModal(false);
             } else {
               Swal.fire({
@@ -116,4 +116,4 @@ function Obat(props){
     </div>
     );
 }
-export default Obat;
+export default Kunjungan;

@@ -12,7 +12,6 @@ function Siswa(props) {
     fetch("http://localhost/Project-UKS/backend/proses/tampil_data.php?type=siswa")
       .then(res => res.json())
       .then(data => {
-        console.log("DATA SISWA:", data); // Tambahkan ini
         setSiswa(data);
       })
       .catch(err => console.error("Gagal ambil data siswa:", err));
@@ -88,9 +87,9 @@ function Siswa(props) {
                 Swal.fire({
                   icon: 'success',
                   title: 'Berhasil!',
-                  text: props.name === 'edit'
+                  text: props.modalName === 'edit'
                     ? 'Data berhasil diubah'
-                    : props.name === 'delete'
+                    : props.modalName === 'delete'
                       ? 'Data berhasil dihapus'
                       : 'Data berhasil ditambahkan',
                   timer: 1500,

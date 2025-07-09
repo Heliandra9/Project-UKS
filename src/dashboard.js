@@ -7,10 +7,11 @@ import Obat from "./view/data_obat";
 import { useNavigate } from "react-router-dom";
 import './App.css'
 import Swal from 'sweetalert2';
+import Kunjungan from "./view/daftar_kunjungan";
 
 function Dashboard() {
     const navigate = useNavigate();
-    const [searchSiswa, setSearchSiswa] = useState("");
+    const [search, setSearch] = useState("");
     const [nav, setNav] = useState(false);
     const [hober, setHober] = useState(true);
     const [modal, setModal] = useState(false);
@@ -18,8 +19,8 @@ function Dashboard() {
     useEffect(() => {
         localStorage.setItem("view", view);
     }, [view]);
-    const funcSearchSiswa = (e) => {
-        setSearchSiswa(e.target.value);
+    const funcSearch = (e) => {
+        setSearch(e.target.value);
     }
     const funcModal = () => {
         setModal(!modal);
@@ -38,6 +39,8 @@ function Dashboard() {
     const logot = () => {
         localStorage.setItem("isLogin", "false");
         localStorage.removeItem("username");
+        localStorage.removeItem("tipe_user");
+        localStorage.removeItem("view");
         localStorage.setItem("showLogoutSuccess", "true");
         navigate("/");
     }
@@ -82,18 +85,24 @@ function Dashboard() {
                 />
             </div>
             <div className={`${nav ? 'w-full ml-16' : 'w-5/6 lg:ml-58 md:ml-40 sm:ml-30'} mt-58 sm:mt-0 transition-all duration-300 ease-in-out h-full flex flex-col`}>
-                <div className="w-full flex mb-2">
+                <div className="w-full flex mb-2 items-center">
                     <div className="flex">
                         <Button color="white items-center sm:block hidden" onClick={toggleNav}>
                             <i className="bi bi-list"></i>
                         </Button>
                     </div>
                     {view === "home" ?
-                        <h1 className="text-2xl font-bold ml-4 text-gray-700">Dashboard</h1> :
-                        (view === "siswa" || view === "obat") && (
+                        <h1 className="text-2xl font-bold ml-4 text-gray-700">Beranda</h1> :
+                        (view === "siswa" || view === "obat") ? (
                             <div className={`flex ml-6 w-full mr-40`}>
-                                <input onKeyUp={funcSearchSiswa} placeholder={`Cari data siswa`} className={`bg-white w-full shadow-md focus:outline-0 px-2 rounded-sm`} />
-                                {(view === "siswa" || view === "obat") && <Button onClick={funcModalInsert} width="w-1/6 ml-8" color="blue-500" sizeTxT="text-sm" textColor="white">+&nbsp;Tambah&nbsp;data</Button>}
+                                <input onKeyUp={funcSearch} placeholder={`Cari data ${view === "siswa" ? "siswa" : view === "obat" && "obat"}`} className={`bg-white w-full shadow-md focus:outline-0 px-2 rounded-sm`} />
+                                <Button onClick={funcModalInsert} width="w-1/6 ml-8" color="blue-500" sizeTxT="text-sm" textColor="white">+&nbsp;Tambah&nbsp;data</Button>
+                            </div>
+                        ): view === "kunjungan" && (
+                            <div className={`flex ml-6 w-full mr-40`}>
+                                <input onKeyUp={funcSearch} placeholder={`Cari daftar kunjungan`} className={`bg-white w-full shadow-md focus:outline-0 px-2 rounded-sm`} />
+                                <input type="date" onChange={funcSearch} placeholder={`Cari daftar kunjungan`} className={`ml-8 bg-white w-1/6 shadow-md focus:outline-0 px-2 rounded-sm`} />
+                                <Button onClick={funcModalInsert} width="w-1/6 ml-8" color="blue-500" sizeTxT="text-sm" textColor="white">+&nbsp;Tambah&nbsp;data</Button>
                             </div>
                         )
                     }
@@ -114,10 +123,10 @@ function Dashboard() {
                             setModal={setModalInsert}
                             data={data}
                             setData={setData}
-                            cari={searchSiswa}
+                            cari={search}
                             view={view}
                         /> :
-                            view === "obat" &&
+                            view === "obat" ?
                             <Obat
                                 modalName={modalName}
                                 setModalName={setModalName}
@@ -125,9 +134,20 @@ function Dashboard() {
                                 setModal={setModalInsert}
                                 data={data}
                                 setData={setData}
-                                cari={searchSiswa}
+                                cari={search}
                                 view={view}
-                            />}
+                            /> : view === "kunjungan" && 
+                            <Kunjungan
+                                modalName={modalName}
+                                setModalName={setModalName}
+                                modal={modalInsert}
+                                setModal={setModalInsert}
+                                data={data}
+                                setData={setData}
+                                cari={search}
+                                view={view}
+                            />
+                            }
                 </div>
             </div>
         </div>

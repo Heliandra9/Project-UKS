@@ -11,8 +11,13 @@ $type = isset($_GET['type']) ? $_GET['type'] : 'siswa';
 
 if ($type === 'obat') {
     $sql = "SELECT * FROM tbl_obat";
-} else {
+} elseif($type === 'siswa') {
     $sql = "SELECT * FROM tbl_siswa";
+} elseif($type === 'kunjungan') {
+    $sql = "SELECT * FROM tbl_kunjungan INNER JOIN tbl_siswa ON tbl_kunjungan.id_siswa = tbl_siswa.id";
+} else {
+    echo json_encode(['error' => 'Invalid type']);
+    exit;
 }
 
 $result = $db->query($sql);

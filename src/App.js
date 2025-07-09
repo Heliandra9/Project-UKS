@@ -35,7 +35,8 @@ function App() {
       if (data.status === "sukses") {
         localStorage.setItem("isLogin", "true");
         localStorage.setItem("username", data.username);
-        localStorage.setItem("showLoginSuccess", "true"); // Tambahkan flag
+        localStorage.setItem("tipe_user", data.tipe_user);
+        localStorage.setItem("showLoginSuccess", "true");
         navigate("/dashboard");
       } else {
         setData(data.message);
