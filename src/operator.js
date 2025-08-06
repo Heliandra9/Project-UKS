@@ -3,8 +3,11 @@ import {
   FiPlus, FiSearch, FiUser, FiFileText, FiPieChart,
   FiSettings, FiLogOut, FiX
 } from 'react-icons/fi';
+import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
 
-const App = () => {
+function Operator() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('visitors');
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,6 +19,7 @@ const App = () => {
     { id: 4, name: 'Oralit', stock: 40 },
     { id: 5, name: 'Vitamin C', stock: 60 },
   ]);
+  const userType = localStorage.getItem("tipe_user");
 
   const [formData, setFormData] = useState({
     studentName: '',
@@ -24,6 +28,32 @@ const App = () => {
     selectedMedicines: [],
     notes: ''
   });
+
+  useEffect(() => {
+    if (localStorage.getItem("isLogin") !== "true") {
+      window.location.href = "/";
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userType !== "operator") {
+      navigate('/'); // arahkan ke halaman home atau login
+      Swal.fire({
+        icon: 'error',
+        title: 'Akses Ditolak',
+        text: 'Anda tidak memiliki akses ke halaman ini.',
+      })
+    }
+  }, []);
+
+  const logot = () => {
+    localStorage.setItem("isLogin", "false");
+    localStorage.removeItem("username");
+    localStorage.removeItem("tipe_user");
+    localStorage.removeItem("view");
+    localStorage.setItem("showLogoutSuccess", "true");
+    navigate("/");
+  };
 
   useEffect(() => {
     const sampleData = [
@@ -147,7 +177,7 @@ const App = () => {
           </button>
         </nav>
 
-        <button className="flex items-center p-3 rounded-lg hover:bg-indigo-500 mt-auto">
+        <button className="flex items-center p-3 rounded-lg hover:bg-indigo-500 mt-auto" onClick={logot}>
           <FiLogOut className="mr-3" /> Keluar
         </button>
       </div>
@@ -323,4 +353,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Operator;

@@ -9,6 +9,8 @@ import {
   Tooltip,
   Legend
 } from "chart.js";
+import { FiX } from "react-icons/fi";
+
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -311,186 +313,196 @@ function Modal(props) {
       { name: "berat_badan", label: "Berat Badan" },
       { name: "golongan_darah", label: "Golongan Darah" }
     ]
-    : props.view === "obat" ? [
-      { name: "nama_obat", label: "Nama Obat" },
-      { name: "kode_obat", label: "Kode Obat" },
-      { name: "kandungan", label: "Kandungan Obat" },
-      { name: "stock_obat", label: "Stock Obat" },
-      { name: "jenis_obat", label: "Jenis Obat" }
-    ] : props.view === "kunjungan" ? [
-      { name: "nama", label: "Nama" },
-      { name: "kelas", label: "Kelas" },
-      { name: "tanggal", label: "Tanggal" },
-      { name: "keterangan", label: "Keterangan" }
-    ] : props.view === "user" ? [
-      { name: "username", label: "Username" },
-      { name: "password", label: "Password" },
-      { name: "tipe_user", label: "Tipe User" }
-    ] : [];
+    : props.view === "obat"
+      ? [
+        { name: "nama_obat", label: "Nama Obat" },
+        { name: "kode_obat", label: "Kode Obat" },
+        { name: "kandungan", label: "Kandungan Obat" },
+        { name: "stock_obat", label: "Stock Obat" },
+        { name: "jenis_obat", label: "Jenis Obat" }
+      ]
+      : props.view === "kunjungan"
+        ? [
+          { name: "nama", label: "Nama" },
+          { name: "kelas", label: "Kelas" },
+          { name: "tanggal", label: "Tanggal" },
+          { name: "keterangan", label: "Keterangan" },
+          { name: "obat", label: "Resep Diberikan" } // 👈 Field multiselect
+        ]
+        : props.view === "user"
+          ? [
+            { name: "username", label: "Username" },
+            { name: "password", label: "Password" },
+            { name: "tipe_user", label: "Tipe User" }
+          ]
+          : [];
 
   const [form, setForm] = useState({});
   const [error, setError] = useState({});
+  const [dataObat, setDataObat] = useState([]); // Untuk data pilihan obat
 
-  useEffect(() => {
+useEffect(() => {
+  if (props.view === "kunjungan") {
+    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
+      .then(res => res.json())
+      .then(data => setDataObat(data))
+      .catch(err => console.error("Gagal ambil data obat:", err));
+  }
+
+  // Set default form, khusus kunjungan harus pastikan form.obat = []
+  if (props.view === "kunjungan") {
+    setForm({ ...(props.data || {}), obat: props.data?.obat || [] });
+  } else {
     setForm(props.data || {});
-  }, [props.data, props.statE]);
+  }
+}, [props.data, props.statE]);
+
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value, multiple, options } = e.target;
+    if (multiple) {
+      const selected = Array.from(options).filter(o => o.selected).map(o => o.value);
+      setForm({ ...form, [name]: selected });
+    } else {
+      setForm({ ...form, [name]: value });
+    }
   };
-const handleSubmit = () => {
-  console.log("🚀 Submit button clicked");
-  console.log("🧾 Form data:", form);
-  console.log("📌 Mode:", props.name);
 
-  if (props.name === "edit" || props.name === "insert") {
+  const handleSubmit = () => {
     let hasError = false;
     let newError = {};
 
-    fields.forEach(field => {
-      if (!form[field.name]) {
-        hasError = true;
-        newError[field.name] = `${field.label} tidak boleh kosong`;
-        console.warn(`⚠️ Field kosong: ${field.name}`);
-      }
-    });
+    if (props.name === "edit" || props.name === "insert") {
+      fields.forEach(field => {
+        if (!form[field.name] || form[field.name].length === 0) {
+          hasError = true;
+          newError[field.name] = `${field.label} tidak boleh kosong`;
+        }
+      });
+    }
 
     setError(newError);
+    if (hasError) return;
 
-    if (hasError) {
-      console.error("❌ Validasi gagal:", newError);
-      return;
-    }
-  }
-
-  console.log("✅ Data valid. Mengirim ke onSubmit()...");
-  props.onSubmit(form);
-};
-
-
+    props.onSubmit(form);
+  };
 
   return (
     <div className={`fixed inset-0 flex items-center justify-center z-50 ${props.stat ? 'block' : 'hidden'} backdrop-blur-sm`}>
-      <div className={`bg-white relative rounded-lg shadow-lg p-6 w-96`}>
+      <div className="bg-white relative rounded-lg shadow-lg p-6 w-96">
         <h2 className="text-xl font-bold mb-4">{props.title}</h2>
-        <div className="flex flex-col gap-2 mb-4"><i onClick={props.setM} className={`bi bi-x-lg absolute top-6 right-6 cursor-pointer`}></i>
-          {props.name === "edit" ? fields.map(field => (
+        <i onClick={props.setM} className="bi bi-x-lg absolute top-6 right-6 cursor-pointer"></i>
+        <div className="flex flex-col gap-2 mb-4">
+          {props.name !== "delete" ? fields.map(field => (
             <div key={field.name}>
               <label className="text-gray-500">{field.label}</label>
               {field.name === "golongan_darah" ? (
-                <select
-                  name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                >
-                  <option disabled value="">Pilih Golongan Darah</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
+                <select name={field.name} value={form[field.name] || ""} onChange={handleChange} className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-b p-2`}>
+                  <option value="">Pilih Golongan Darah</option>
+                  {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(item => <option key={item} value={item}>{item}</option>)}
                 </select>
-              ) : field.name === 'jenis_obat' ? (
-                <select
-                  name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                >
-                  <option disabled value="">Pilih Jenis Obat</option>
-                  <option value="Tablet">Tablet</option>
-                  <option value="Sirup">Sirup</option>
-                  <option value="Kapsul">Kapsul</option>
-                  <option value="Salep">Salep</option>
+              ) : field.name === "jenis_obat" ? (
+                <select name={field.name} value={form[field.name] || ""} onChange={handleChange} className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-b p-2`}>
+                  <option value="">Pilih Jenis Obat</option>
+                  {["Tablet", "Sirup", "Kapsul", "Salep"].map(item => <option key={item} value={item}>{item}</option>)}
                 </select>
               ) : field.name === "tanggal" ? (
-                <input
-                  type="date"
-                  name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                />
+                <input type="date" name={field.name} value={form[field.name] || ""} onChange={handleChange} className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-b p-2`} />
+              ) : field.name === "obat" ? (
+                <div className="space-y-3">
+                  {/* Obat Terpilih */}
+                  <div className="flex flex-wrap gap-2">
+                    {(form.obat || []).map((obat, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full shadow-sm"
+                      >
+                        <span className="mr-2">{obat.nama}</span>
+                        <input
+                          type="number"
+                          min="1"
+                          value={obat.jumlah}
+                          onChange={(e) => {
+                            const newObat = [...form.obat];
+                            newObat[idx].jumlah = parseInt(e.target.value) || 1;
+                            setForm({ ...form, obat: newObat });
+                          }}
+                          className="w-10 bg-transparent border-b border-blue-300 text-sm text-center focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newObat = form.obat.filter((_, i) => i !== idx);
+                            setForm({ ...form, obat: newObat });
+                          }}
+                          className="ml-2 text-blue-600 hover:text-red-500"
+                        >
+                          <FiX size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* List Obat */}
+                  <div className="border border-gray-300 rounded-xl p-2 max-h-48 overflow-y-auto shadow-inner">
+                    {dataObat.length === 0 ? (
+                      <p className="text-sm text-gray-500 text-center">Tidak ada data obat</p>
+                    ) : (
+                      dataObat.map((obat) => {
+                        const index = form.obat?.findIndex(o => o.nama === obat.nama_obat);
+                        const isSelected = index !== -1;
+
+                        return (
+                          <div
+                            key={obat.id}
+                            onClick={() => {
+                              if (isSelected) {
+                                // Tambahkan jumlah +1
+                                const newObat = [...form.obat];
+                                newObat[index].jumlah += 1;
+                                setForm({ ...form, obat: newObat });
+                              } else {
+                                // Tambah ke list
+                                setForm({
+                                  ...form,
+                                  obat: [...(form.obat || []), { nama: obat.nama_obat, jumlah: 1 }]
+                                });
+                              }
+                            }}
+                            className={`flex justify-between items-center px-3 py-2 rounded-lg cursor-pointer transition-all mb-1 ${isSelected
+                                ? 'bg-blue-100 text-blue-800 font-semibold'
+                                : 'hover:bg-gray-100'
+                              }`}
+                          >
+                            <span>{obat.nama_obat}</span>
+                            <span className="text-xs text-gray-500">Stok: {obat.stock_obat}</span>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
               ) : (
-                <input
-                  name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                />
-              )}
+                <input name={field.name} value={form[field.name] || ""} onChange={handleChange} className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-b p-2`} />
+              )
+              }
+              {error[field.name] && <p className="text-red-500 text-sm">{error[field.name]}</p>}
             </div>
-          )) : props.name === "delete" ? (
-            <div className="text-center">Apakah anda yakin ingin mengahapus data <p className={`font-bold`}>{props.data && (props.data.nama || props.data.nama_obat || props.data.username)}</p></div>
-          ) : props.name === "insert" && fields.map(field => (
-            <div key={field.name}>
-              <label className="text-gray-500">{field.label}</label>
-              {field.name === "golongan_darah" ? (
-                <select
-                  name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                >
-                  <option disabled value="">Pilih Golongan Darah</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                </select>
-              ) : field.name === 'jenis_obat' ? (
-                <select
-                  name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                >
-                  <option disabled selected value="">Pilih Jenis Obat</option>
-                  <option value="Tablet">Tablet</option>
-                  <option value="Sirup">Sirup</option>
-                  <option value="Kapsul">Kapsul</option>
-                  <option value="Salep">Salep</option>
-                </select>
-              ) : field.name === "tanggal" ? (
-                <input
-                  type="date"
-                  name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                />
-              ) : field.name === "password" && props.name !== "insert" ? null(
-                <input
-                  type={field.name === "password" ? "password" : "text"}
-                  name={field.name}
-                  className={`...`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                />
-              ) : (
-                <input
-                  name={field.name}
-                  className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
-                  value={form[field.name] || ""}
-                  onChange={handleChange}
-                />
-              )}
+          )) : (
+            <div className="text-center">
+              Apakah anda yakin ingin menghapus data <p className="font-bold">{props.data?.nama || props.data?.nama_obat || props.data?.username}</p>?
             </div>
-          ))}
+          )}
         </div>
-        <Button onClick={handleSubmit} color={props.name === 'edit' ? 'blue-500' : props.name === 'delete' ? 'red-500' : props.name === 'insert' && 'blue-500'} textColor="white">
-          {props.name === 'edit' ? 'Simpan' : props.name === 'insert' ? 'Tambahkan' : props.name === 'delete' && 'Hapus'}
-        </Button>
+        <button
+          onClick={handleSubmit}
+          className={`w-full py-2 rounded text-white ${props.name === 'edit' || props.name === 'insert' ? 'bg-blue-500' : 'bg-red-500'}`}
+        >
+          {props.name === 'edit' ? 'Simpan' : props.name === 'insert' ? 'Tambahkan' : 'Hapus'}
+        </button>
       </div>
     </div>
   );
 }
+
 export { FormFloating, Button, SideBar, Card, Chart, Table, Modal };

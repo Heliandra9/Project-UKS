@@ -21,6 +21,7 @@ function Admin() {
   const [modalName, setModalName] = useState("");
   const [modalInsert, setModalInsert] = useState(false);
   const [data, setData] = useState({});
+  const userType = localStorage.getItem("tipe_user");
 
   useEffect(() => {
     localStorage.setItem("view", view);
@@ -29,6 +30,17 @@ function Admin() {
   useEffect(() => {
     if (localStorage.getItem("isLogin") !== "true") {
       window.location.href = "/";
+    }
+  }, []);
+
+    useEffect(() => {
+    if (userType !== "Admin") {
+      navigate('/'); // arahkan ke halaman home atau login
+      Swal.fire({
+        icon: 'error',
+        title: 'Akses Ditolak',
+        text: 'Anda tidak memiliki akses ke halaman ini.',
+      })
     }
   }, []);
 

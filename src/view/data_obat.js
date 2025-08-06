@@ -8,7 +8,7 @@ function Obat(props){
       const [siswa, setSiswa] = useState([]);
 
       const getDataObat = () => {
-        fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=obat")
+        fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
           .then(res => res.json())
           .then(data => {
             setSiswa(data);
@@ -55,11 +55,11 @@ function Obat(props){
 
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=obat";
+            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_tambah.php?type=obat";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php";
+            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_edit.php";
           } else if (props.modalName === "delete") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php?type=obat";
+            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_hapus.php?type=obat";
             formBody.delete("kode_obat");
             formBody.delete("nama_obat");
             formBody.delete("jenis_obat");

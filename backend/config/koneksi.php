@@ -1,2 +1,2 @@
 <?php
-$db = mysqli_connect("localhost", "root", "", "uks");
+$db = mysqli_connect("localhost", "root", "", "db_uks");
