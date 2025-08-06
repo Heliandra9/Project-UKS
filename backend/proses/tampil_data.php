@@ -11,6 +11,8 @@ $type = isset($_GET['type']) ? $_GET['type'] : 'siswa';
 
 if ($type === 'obat') {
     $sql = "SELECT * FROM tbl_obat";
+} elseif($type === 'user') {
+    $sql = "SELECT * FROM tbl_user";
 } elseif($type === 'siswa') {
     $sql = "SELECT * FROM tbl_siswa";
 } elseif($type === 'kunjungan') {

@@ -8,7 +8,7 @@ function Kunjungan(props){
       const [siswa, setSiswa] = useState([]);
 
       const getDataKunjungan = () => {
-        fetch("http://localhost/Project-UKS/backend/proses/tampil_data.php?type=kunjungan")
+        fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=kunjungan")
           .then(res => res.json())
           .then(data => {
             setSiswa(data);
@@ -55,11 +55,11 @@ function Kunjungan(props){
 
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/Project-UKS/backend/proses/proses_edit.php";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php";
           } else if (props.modalName === "delete") {
-            endpoint = "http://localhost/Project-UKS/backend/proses/proses_hapus.php?type=kunjungan";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php?type=kunjungan";
             formBody.delete("kode_kunjungan");
             formBody.delete("nama_kunjungan");
             formBody.delete("jenis_kunjungan");

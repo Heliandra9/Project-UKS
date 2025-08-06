@@ -2,25 +2,23 @@ import { Table, Modal } from "../component/Component";
 import { useState, useEffect } from "react";
 import Swal from 'sweetalert2';
 
-
-function Siswa(props) {
+function User(props) {
   const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
   const [data, setData] = useState("");
-  const [siswa, setSiswa] = useState([]);
+  const [user, setUser] = useState([]);
 
-  const getDataSiswa = () => {
-    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=siswa")
+  const getDataUser = () => {
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=user")
       .then(res => res.json())
       .then(data => {
-        setSiswa(data);
+        setUser(data);
       })
-      .catch(err => console.error("Gagal ambil data siswa:", err));
+      .catch(err => console.error("Gagal ambil data User:", err));
   };
 
   useEffect(() => {
-    getDataSiswa();
+    getDataUser();
   }, []);
-
 
   const funcModal = () => {
     if (props.setModal) {
@@ -35,20 +33,21 @@ function Siswa(props) {
         cari={props.cari}
         funcName={props.setModalName}
         setData={props.setData}
-        data={siswa}
-        name="data_siswa"
-        view={props.view} // <-- tambahkan ini
+        data={user}
+        name="data_User"
+        view={props.view}
       />
+
       <Modal
         setM={funcModal}
         name={props.modalName}
         data={props.data}
         title={
           props.modalName === 'edit'
-            ? 'Edit data siswa'
+            ? 'Edit data User'
             : props.modalName === 'delete'
-              ? 'Hapus data siswa'
-              : props.modalName === 'insert' && 'Tambah data siswa'
+              ? 'Hapus data User'
+              : props.modalName === 'insert' && 'Tambah data User'
         }
         stat={props.modal}
         onSubmit={(form) => {
@@ -59,19 +58,17 @@ function Siswa(props) {
 
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=siswa";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=user";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php?type=user";
+            formBody.append("id", props.data.id_user); // pastikan props.data.id tersedia
           } else if (props.modalName === "delete") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php?type=siswa";
-            // Untuk hapus, biasanya hanya perlu kirim NIS
-            formBody.delete("nis");
-            formBody.delete("nama");
-            formBody.delete("kelas");
-            formBody.delete("tinggi_badan");
-            formBody.delete("berat_badan");
-            formBody.delete("golongan_darah");
-            formBody.append("id", props.data.id);
+
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php";
+            formBody.set("id", props.data.id_user); // gunakan ID sebagai identifier
+            formBody.set("type", "user"); // <-- Tambahkan ini
+
+
           }
 
           fetch(endpoint, {
@@ -95,8 +92,7 @@ function Siswa(props) {
                   timer: 1500,
                   showConfirmButton: false
                 });
-                // Refresh data dan tutup modal
-                getDataSiswa && getDataSiswa();
+                getDataUser();
                 props.setModal(false);
               } else {
                 Swal.fire({
@@ -111,9 +107,10 @@ function Siswa(props) {
               console.error("Error:", err);
             });
         }}
-        view={props.view} // <-- tambahkan ini
+        view={props.view}
       />
     </div>
   );
 }
-export default Siswa;
+
+export default User;

@@ -32,7 +32,8 @@ function SideBar(props) {
     { name: "Beranda", icon: "bi bi-house-door-fill", class: props.view === "home" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("home") } },
     { name: "Data Siswa", icon: "bi bi-person-fill", class: props.view === "siswa" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("siswa") } },
     { name: "Data Obat", icon: "bi bi-capsule", class: props.view === "obat" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("obat") } },
-    { name: "Daftar Kunjungan", icon: "bi bi-card-list", class: props.view === "kunjungan" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("kunjungan") } }
+    { name: "Daftar Kunjungan", icon: "bi bi-card-list", class: props.view === "kunjungan" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("kunjungan") } },
+    { name: "Kelola User", icon: "bi bi-people-fill", class: props.view === "user" ? 'bg-green-900 border-l-green-700 border-l-4' : 'hover:bg-green-600', onClick: () => { props.setView("user") } },
   ];
 
   const activeNav = items.findIndex(item => item.value === props.view)
@@ -173,17 +174,21 @@ function Table(props) {
       (item.nama && item.nama.toLowerCase().includes(keyword)) ||
       (item.kelas && item.kelas.toLowerCase().includes(keyword)) ||
       (item.nis && item.nis.toString().includes(keyword))
-    ) :props.view === "obat" ? (
+    ) : props.view === "obat" ? (
       (item.nama_obat && item.nama_obat.toLowerCase().includes(keyword)) ||
       (item.kode_obat && item.kode_obat.toLowerCase().includes(keyword)) ||
       (item.kandungan && item.kandungan.toLowerCase().includes(keyword)) ||
       (item.jenis_obat && item.jenis_obat.toLowerCase().includes(keyword))
-    ):props.view === "kunjungan" ? (
+    ) : props.view === "user" ? (
+      (item.username && item.usernmae.toLowerCase().includes(keyword)) ||
+      (item.password && item.password.toLowerCase().includes(keyword)) ||
+      (item.tipe_user && item.tipe_user.toLowerCase().includes(keyword))
+    ) : props.view === "kunjungan" ? (
       (item.nama && item.nama.toLowerCase().includes(keyword)) ||
       (item.kelas && item.kelas.toLowerCase().includes(keyword)) ||
       (item.tanggal && item.tanggal.toLowerCase().includes(keyword)) ||
       (item.keterangan && item.keterangan.toLowerCase().includes(keyword))
-    ): '');
+    ) : '');
   })
   return (
     <div className="relative overflow-x-auto w-full rounded-sm">
@@ -200,26 +205,34 @@ function Table(props) {
                 <th scope="col" className="px-6 py-3">Berat&nbsp;Badan</th>
                 <th scope="col" className="px-6 py-3">Golongan&nbsp;Darah</th>
                 <th scope="col" className="px-6 py-3">Aksi</th>
-              </>) :props.view === "obat" ? (
-              <>
-                <th scope="col" className="px-6 py-3">No</th>
-                <th scope="col" className="px-6 py-3">Nama Obat</th>
-                <th scope="col" className="px-6 py-3">Kode Obat</th>
-                <th scope="col" className="px-6 py-3">Jenis Obat</th>
-                <th scope="col" className="px-6 py-3">Kandungan Obat</th>
-                <th scope="col" className="px-6 py-3">Stock Obat</th>
-                <th scope="col" className="px-6 py-3">Aksi</th>
-              </>
-            ): props.view === "kunjungan" ? (
-              <>
-                <th scope="col" className="px-6 py-3">No</th>
-                <th scope="col" className="px-6 py-3">Nama</th>
-                <th scope="col" className="px-6 py-3">Kelas</th>
-                <th scope="col" className="px-6 py-3">Tanggal</th>
-                <th scope="col" className="px-6 py-3">Keterangan</th>
-                <th scope="col" className="px-6 py-3">Aksi</th>
-              </>
-            ) : ''}
+              </>) : props.view === "obat" ? (
+                <>
+                  <th scope="col" className="px-6 py-3">No</th>
+                  <th scope="col" className="px-6 py-3">Nama Obat</th>
+                  <th scope="col" className="px-6 py-3">Kode Obat</th>
+                  <th scope="col" className="px-6 py-3">Jenis Obat</th>
+                  <th scope="col" className="px-6 py-3">Kandungan Obat</th>
+                  <th scope="col" className="px-6 py-3">Stock Obat</th>
+                  <th scope="col" className="px-6 py-3">Aksi</th>
+                </>
+              ) : props.view === "kunjungan" ? (
+                <>
+                  <th scope="col" className="px-6 py-3">No</th>
+                  <th scope="col" className="px-6 py-3">Nama</th>
+                  <th scope="col" className="px-6 py-3">Kelas</th>
+                  <th scope="col" className="px-6 py-3">Tanggal</th>
+                  <th scope="col" className="px-6 py-3">Keterangan</th>
+                  <th scope="col" className="px-6 py-3">Aksi</th>
+                </>
+              ) : props.view === "user" ? (
+                <>
+                  <th scope="col" className="px-6 py-3">No</th>
+                  <th scope="col" className="px-6 py-3">Username</th>
+                  <th scope="col" className="px-6 py-3">Password</th>
+                  <th scope="col" className="px-6 py-3">Tipe User</th>
+                  <th scope="col" className="px-6 py-3">Aksi</th>
+                </>
+              ) : ''}
           </tr>
         </thead>
         <tbody>
@@ -242,21 +255,28 @@ function Table(props) {
                     <td className="px-6 py-4">{item.berat_badan}</td>
                     <td className="px-6 py-4">{item.golongan_darah}</td>
                   </>) : props.view === "obat" ? (
-                  <>
-                    <td className="px-6 py-4 capitalize">{item.nama_obat}</td>
-                    <td className="px-6 py-4 uppercase">{item.kode_obat}</td>
-                    <td className="px-6 py-4">{item.jenis_obat}</td>
-                    <td className="px-6 py-4">{item.kandungan}</td>
-                    <td className="px-6 py-4">{item.stock_obat}</td>
-                  </>
-                ): props.view === "kunjungan" ? (
-                  <>
-                    <td className="px-6 py-4 capitalize">{item.nama}</td>
-                    <td className="px-6 py-4 uppercase">{item.kelas}</td>
-                    <td className="px-6 py-4">{item.tanggal}</td>
-                    <td className="px-6 py-4">{item.keterangan}</td>
-                  </>
-                ) : ''}
+                    <>
+                      <td className="px-6 py-4 capitalize">{item.nama_obat}</td>
+                      <td className="px-6 py-4 uppercase">{item.kode_obat}</td>
+                      <td className="px-6 py-4">{item.jenis_obat}</td>
+                      <td className="px-6 py-4">{item.kandungan}</td>
+                      <td className="px-6 py-4">{item.stock_obat}</td>
+                    </>
+                  ) : props.view === "kunjungan" ? (
+                    <>
+                      <td className="px-6 py-4 capitalize">{item.nama}</td>
+                      <td className="px-6 py-4 uppercase">{item.kelas}</td>
+                      <td className="px-6 py-4">{item.tanggal}</td>
+                      <td className="px-6 py-4">{item.keterangan}</td>
+                    </>
+                  ) : props.view === "user" ? (
+                    <>
+                      <td className="px-6 py-4 capitalize">{item.username}</td>
+                      <td className="px-6 py-4 ">{item.password}</td>
+                      <td className="px-6 py-4 ">{item.tipe_user}</td>
+
+                    </>
+                  ) : ''}
                 <td className="px-6 py-4 flex">
                   <button onClick={() => {
                     props.setData(item);
@@ -291,17 +311,21 @@ function Modal(props) {
       { name: "berat_badan", label: "Berat Badan" },
       { name: "golongan_darah", label: "Golongan Darah" }
     ]
-    :props.view === "obat" ? [
+    : props.view === "obat" ? [
       { name: "nama_obat", label: "Nama Obat" },
       { name: "kode_obat", label: "Kode Obat" },
       { name: "kandungan", label: "Kandungan Obat" },
       { name: "stock_obat", label: "Stock Obat" },
       { name: "jenis_obat", label: "Jenis Obat" }
-    ]: props.view === "kunjungan" ? [
+    ] : props.view === "kunjungan" ? [
       { name: "nama", label: "Nama" },
       { name: "kelas", label: "Kelas" },
       { name: "tanggal", label: "Tanggal" },
       { name: "keterangan", label: "Keterangan" }
+    ] : props.view === "user" ? [
+      { name: "username", label: "Username" },
+      { name: "password", label: "Password" },
+      { name: "tipe_user", label: "Tipe User" }
     ] : [];
 
   const [form, setForm] = useState({});
@@ -314,21 +338,35 @@ function Modal(props) {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
-  const handleSubmit = () => {
-    if (props.name === "edit" || props.name === "insert") {
-      let hasError = false;
-      let newError = {};
-      fields.forEach(field => {
-        if (!form[field.name]) {
-          hasError = true;
-          newError[field.name] = `${field.label} tidak boleh kosong`;
-        }
-      });
-      setError(newError);
-      if (hasError) return;
+const handleSubmit = () => {
+  console.log("🚀 Submit button clicked");
+  console.log("🧾 Form data:", form);
+  console.log("📌 Mode:", props.name);
+
+  if (props.name === "edit" || props.name === "insert") {
+    let hasError = false;
+    let newError = {};
+
+    fields.forEach(field => {
+      if (!form[field.name]) {
+        hasError = true;
+        newError[field.name] = `${field.label} tidak boleh kosong`;
+        console.warn(`⚠️ Field kosong: ${field.name}`);
+      }
+    });
+
+    setError(newError);
+
+    if (hasError) {
+      console.error("❌ Validasi gagal:", newError);
+      return;
     }
-    props.onSubmit(form);
-  };
+  }
+
+  console.log("✅ Data valid. Mengirim ke onSubmit()...");
+  props.onSubmit(form);
+};
+
 
 
   return (
@@ -369,7 +407,7 @@ function Modal(props) {
                   <option value="Kapsul">Kapsul</option>
                   <option value="Salep">Salep</option>
                 </select>
-              ):field.name === "tanggal"? (
+              ) : field.name === "tanggal" ? (
                 <input
                   type="date"
                   name={field.name}
@@ -387,7 +425,7 @@ function Modal(props) {
               )}
             </div>
           )) : props.name === "delete" ? (
-            <div className="text-center">Apakah anda yakin ingin mengahapus data <p className={`font-bold`}>{props.data && (props.data.nama || props.data.nama_obat)}</p></div>
+            <div className="text-center">Apakah anda yakin ingin mengahapus data <p className={`font-bold`}>{props.data && (props.data.nama || props.data.nama_obat || props.data.username)}</p></div>
           ) : props.name === "insert" && fields.map(field => (
             <div key={field.name}>
               <label className="text-gray-500">{field.label}</label>
@@ -421,11 +459,19 @@ function Modal(props) {
                   <option value="Kapsul">Kapsul</option>
                   <option value="Salep">Salep</option>
                 </select>
-              ):field.name === "tanggal"? (
+              ) : field.name === "tanggal" ? (
                 <input
                   type="date"
                   name={field.name}
                   className={`w-full ${error[field.name] ? 'border-red-500' : 'border-gray-500'} border-gray-500 focus:outline-none border-b-1 focus:border-b-blue-500 focus:text-blue-500 transition-all duration-300 ease-in-out p-2`}
+                  value={form[field.name] || ""}
+                  onChange={handleChange}
+                />
+              ) : field.name === "password" && props.name !== "insert" ? null(
+                <input
+                  type={field.name === "password" ? "password" : "text"}
+                  name={field.name}
+                  className={`...`}
                   value={form[field.name] || ""}
                   onChange={handleChange}
                 />
