@@ -106,6 +106,8 @@ function User(props) {
             .catch((err) => {
               console.error("Error:", err);
             });
+            
+          console.log(formBody.toString());
         }}
         view={props.view}
       />

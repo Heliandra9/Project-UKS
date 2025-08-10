@@ -1,37 +1,67 @@
 import { useState, useEffect } from "react";
-import {Table, Modal} from "../component/Component";
+import { Table, Modal } from "../component/Component";
 import Swal from 'sweetalert2';
 
-function Kunjungan(props){
-      const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
-      const [data, setData] = useState("");
-      const [siswa, setSiswa] = useState([]);
+function Kunjungan(props) {
+  const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
+  const [kunjungan, setKunjungan] = useState("");
+  const [siswa, setSiswa] = useState([]);
+  const [obat, setDataObat] = useState([]);
+  const [form, setForm] = useState({ obat: [] });
+  const [error, setError] = useState({});
 
-      const getDataKunjungan = () => {
-        fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=kunjungan")
-          .then(res => res.json())
-          .then(data => {
-            setSiswa(data);
-          })
-          .catch(err => console.error("Gagal ambil data kunjungan:", err));
-      }
-      useEffect(() => {
-        getDataKunjungan();
-      }, []);
-    
-      const funcModal = () => {
-        if (props.setModal) {
-          props.setModal(!props.modal);
-        }
-      };
-    return (
-        <div className="w-full h-screen flex">
+  // Ambil data obat & set form awal
+  useEffect(() => {
+    if (props.view === "kunjungan") {
+      fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
+        .then((res) => res.json())
+        .then((data) => setDataObat(data))
+        .catch((err) => console.error("Gagal ambil data obat:", err));
+    }
+    // form awal
+    if (props.view === "kunjungan") {
+      setForm({ ...(props.data || {}), obat: props.data?.obat || [] });
+    } else {
+      setForm(props.data || {});
+    }
+  }, [props.data, props.statE]);
+
+  const getDataKunjungan = () => {
+    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=kunjungan")
+      .then(res => res.json())
+      .then(data => {
+        setKunjungan(data);
+        console.log(data)
+      })
+      .catch(err => console.error("Gagal ambil data kunjungan:", err));
+  }
+  const getDataSiswa = () => {
+    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=siswa")
+      .then(res => res.json())
+      .then(data => {
+        setSiswa(data);
+      })
+      .catch(err => console.error("Gagal ambil data kunjungan:", err));
+  }
+  useEffect(() => {
+    getDataKunjungan();
+    getDataSiswa();
+  }, []);
+
+  const funcModal = () => {
+    if (props.setModal) {
+      props.setModal(!props.modal);
+    }
+  };
+
+  return (
+    <div className="w-full h-screen flex">
       <Table
         setM={funcModal}
         cari={props.cari}
         funcName={props.setModalName}
         setData={props.setData}
-        data={siswa}
+        data={kunjungan}
         name="data_kunjungan"
         view={props.view}
       />
@@ -39,6 +69,12 @@ function Kunjungan(props){
         setM={funcModal}
         name={props.modalName}
         data={props.data}
+        siswa={siswa}
+        obat={obat}
+        form={form}
+        setForm={setForm}
+        error={error}
+        setError={setError}
         title={
           props.modalName === 'edit'
             ? 'Edit data kunjungan'
@@ -49,8 +85,13 @@ function Kunjungan(props){
         stat={props.modal}
         onSubmit={(form) => {
           const formBody = new URLSearchParams();
+
           for (const key in form) {
-            formBody.append(key, form[key]);
+            if (key === "obat") {
+              formBody.append(key, JSON.stringify(form[key]));
+            } else {
+              formBody.append(key, form[key]);
+            }
           }
 
           let endpoint = "";
@@ -75,45 +116,48 @@ function Kunjungan(props){
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: formBody.toString()
           })
-          .then(res => res.text())
-          .then(text => {
-            let result;
-            try {
-              result = JSON.parse(text);
-            } catch (e) {
-              throw new Error("Response bukan JSON");
-            }
-            if (result.status === "success") {
-              Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: props.modalName === 'edit'
-                  ? 'Data berhasil diubah'
-                  : props.modalName === 'delete'
-                    ? 'Data berhasil dihapus'
-                    : 'Data berhasil ditambahkan',
-                timer: 1500,
-                showConfirmButton: false
-              });
-              // Refresh data dan tutup modal
+            .then(res => res.text())
+            .then(text => {
+              console.log("Response asli:", text);
+              let result;
+              try {
+                result = JSON.parse(text);
+              } catch (e) {
+                throw new Error("Response bukan JSON");
+              }
+              if (result.status === "success") {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Berhasil!',
+                  text: props.modalName === 'edit'
+                    ? 'Data berhasil diubah'
+                    : props.modalName === 'delete'
+                      ? 'Data berhasil dihapus'
+                      : result.message,
+                  timer: 1500,
+                  showConfirmButton: false
+                });
+                // Refresh data dan tutup modal
 
-              getDataKunjungan && getDataKunjungan();
-              props.setModal(false);
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: result.message || 'Terjadi kesalahan',
-                showConfirmButton: true
-              });
-            }
-          })
-          .catch(err => console.error("Fetch error:", err));  
-
+                getDataKunjungan && getDataKunjungan();
+                props.setModal(false);
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Gagal!',
+                  text: result.message || 'Terjadi kesalahan',
+                  showConfirmButton: true
+                });
+              }
+              console.log("Data obat dikirim:", result);
+            })
+            .catch(err => console.error("Fetch error:", err));
+            console.log("Body form dikirim:", formBody.toString());
+            
         }}
         view={props.view}
       />
     </div>
-    );
+  );
 }
 export default Kunjungan;

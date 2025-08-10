@@ -4,14 +4,14 @@ import Swal from 'sweetalert2';
 
 function Obat(props){
       const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
-      const [data, setData] = useState("");
-      const [siswa, setSiswa] = useState([]);
+      const [obat, setObat] = useState([]);
 
       const getDataObat = () => {
         fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
           .then(res => res.json())
           .then(data => {
-            setSiswa(data);
+            setObat(data);
+            console.log(data);
           })
           .catch(err => console.error("Gagal ambil data obat:", err));
       }
@@ -31,7 +31,7 @@ function Obat(props){
         cari={props.cari}
         funcName={props.setModalName}
         setData={props.setData}
-        data={siswa}
+        data={obat}
         name="data_obat"
         view={props.view}
       />
@@ -52,7 +52,7 @@ function Obat(props){
           for (const key in form) {
             formBody.append(key, form[key]);
           }
-
+          
           let endpoint = "";
           if (props.modalName === "insert") {
             endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_tambah.php?type=obat";
@@ -62,14 +62,14 @@ function Obat(props){
             endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_hapus.php?type=obat";
             formBody.delete("kode_obat");
             formBody.delete("nama_obat");
-            formBody.delete("jenis_obat");
+            formBody.delete("satuan");
             formBody.delete("kandungan");
             formBody.delete("stock_obat");
             formBody.append("id", props.data.id);
           }
           formBody.append("type", "obat");
-
-
+          
+          
           fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -77,6 +77,7 @@ function Obat(props){
           })
           .then(res => res.text())
           .then(text => {
+            console.log("Response asli:", text);
             let result;
             try {
               result = JSON.parse(text);
@@ -88,15 +89,15 @@ function Obat(props){
                 icon: 'success',
                 title: 'Berhasil!',
                 text: props.modalName === 'edit'
-                  ? 'Data berhasil diubah'
-                  : props.modalName === 'delete'
-                    ? 'Data berhasil dihapus'
-                    : 'Data berhasil ditambahkan',
+                ? 'Data berhasil diubah'
+                : props.modalName === 'delete'
+                ? 'Data berhasil dihapus'
+                : 'Data berhasil ditambahkan',
                 timer: 1500,
                 showConfirmButton: false
               });
               
-
+              
               getDataObat && getDataObat();
               props.setModal(false);
             } else {
@@ -107,9 +108,9 @@ function Obat(props){
                 showConfirmButton: true
               });
             }
+            console.log(result)
           })
           .catch(err => console.error("Fetch error:", err));  
-
         }}
         view={props.view}
       />

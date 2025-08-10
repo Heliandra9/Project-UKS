@@ -16,7 +16,7 @@ export default function Operator() {
     jenisKelamin: "Laki-laki",
   });
 
-  const [resep, setResep] = useState([{ obat: "", jumlah: "", jenis_obat: "" }]);
+  const [resep, setResep] = useState([{ obat: "", jumlah: "", satuan: "" }]);
 
   const handlePatientChange = (e) => {
     setPatient({ ...patient, [e.target.name]: e.target.value });
@@ -26,17 +26,17 @@ export default function Operator() {
     const newResep = [...resep];
     newResep[index][field] = value;
 
-    // Otomatis isi jenis_obat jika obat dipilih
+    // Otomatis isi satuan jika obat dipilih
     if (field === "obat") {
       const found = availableMedicines.find((m) => m.name === value);
-      newResep[index].jenis_obat = found?.unit || "";
+      newResep[index].satuan = found?.unit || "";
     }
 
     setResep(newResep);
   };
 
   const addResep = () => {
-    setResep([...resep, { obat: "", jumlah: "", jenis_obat: "" }]);
+    setResep([...resep, { obat: "", jumlah: "", satuan: "" }]);
   };
 
   const removeResep = (index) => {
@@ -154,10 +154,10 @@ export default function Operator() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium">jenis_obat</label>
+                  <label className="block text-sm font-medium">satuan</label>
                   <input
                     type="text"
-                    value={item.jenis_obat}
+                    value={item.satuan}
                     readOnly
                     className="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
                   />
