@@ -16,7 +16,7 @@ if ($type === 'obat') {
                 kode_obat, 
                 jenis_obat, 
                 kandungan, 
-                CONCAT(stock_obat, satuan) AS stock_dengan_satuan
+                CONCAT(stock_obat, ' ', satuan) AS stock_dengan_satuan
             FROM tbl_obat;";
 } elseif ($type === 'user') {
     $sql = "SELECT * FROM tbl_user";

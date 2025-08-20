@@ -67,7 +67,23 @@ const saran = [
   { id: 3, nama: "Andi", diskon: 0, saldo: 5000 },
 ];
 
+// Data obat 
+
 export default function Operator() {
+  const [obat, setObat] = useState([]);
+
+  const getDataObat = () => {
+    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
+      .then(res => res.json())
+      .then(data => {
+        setObat(data);
+        console.log(data);
+      })
+      .catch(err => console.error("Gagal ambil data obat:", err));
+  }
+  useEffect(() => {
+    getDataObat();
+  }, []);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const logot = () => {
@@ -93,11 +109,6 @@ export default function Operator() {
         behavior: "smooth",
       });
     }
-  };
-
-  const generateKodeTransaksi = () => {
-    const now = new Date();
-    return "TRX-" + now.getTime();
   };
 
   // loading screen
@@ -132,31 +143,44 @@ export default function Operator() {
   const [showNonTunaiModal, setShowNonTunaiModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState("");
   const [selectedKategori, setSelectedKategori] = useState("semua");
-  const filterNamaProduk = produk.filter((item) => {
-    const matchNama = item.nama
+  const filterNamaObat = obat.filter((item) => {
+    const matchNama = (item.nama ?? "")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchKategori =
-      selectedKategori === "semua"
-        ? true
-        : item.id_kategori === selectedKategori;
+
+    let matchKategori = true;
+
+    if (selectedKategori !== "semua") {
+      if (item.id_kategori === selectedKategori) {
+        matchKategori = true;
+      } else {
+        alert(`false`);
+        matchKategori = false;
+      }
+    }
+
     return matchNama && matchKategori;
   });
 
   // Data transaksi: array JS biasa
   const [transaksi, setTransaksi] = useState([]);
 
-  // Tambah produk ke transaksi (JS only)
-  const tambahTransaksi = (produk) => {
+  // Tambah produk ke transaksi
+  const tambahTransaksi = (obat) => {
     setTransaksi((prev) => {
-      const index = prev.findIndex((item) => item.produk.id === produk.id);
+      const index = prev.findIndex((item) => item.obat.id === obat.id);
+      let increment = 1;
       if (index !== -1) {
         const item = prev[index];
-        if (item.qty + 1 > produk.stok) {
+        const parts = item.obat.stock_dengan_satuan?.split(" ") || [];
+        const stok = parts[0] ? parseInt(parts[0], 10) : 0;
+        const satuan = parts[1] ? parts[1].toLowerCase() : "";
+        increment = satuan === "ml" ? 5 : 1;
+        if (item.qty + increment > stok) {
           Swal.fire({
             icon: "error",
             title: "Stok tidak cukup",
-            text: "Jumlah produk melebihi stok yang tersedia",
+            text: "Jumlah Obat melebihi stok yang tersedia",
             timer: 2000,
             timerProgressBar: true,
             showConfirmButton: false,
@@ -164,110 +188,62 @@ export default function Operator() {
           return prev;
         }
         const update = [...prev];
-        update[index].qty += 1;
+        update[index] = { ...item, qty: item.qty + increment };
+        // Update juga state quantities
+        setQuantities((q) => ({
+          ...q,
+          [item.obat.id]: (q[item.obat.id] || item.qty) + increment,
+        }));
         return update;
+      } else {
+        const parts = obat.stock_dengan_satuan?.split(" ") || [];
+        const stok = parts[0] ? parseInt(parts[0], 10) : 0;
+        const satuan = parts[1] ? parts[1].toLowerCase() : "";
+        increment = satuan === "ml" ? 5 : 1;
+        if (stok < increment) {
+          Swal.fire({
+            icon: "error",
+            title: "Stok tidak cukup",
+            text: "Obat ini sedang habis stok",
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+          return prev;
+        }
+        // Update juga state quantities
+        setQuantities((q) => ({
+          ...q,
+          [obat.id]: increment,
+        }));
+        return [...prev, { obat, qty: increment }];
       }
-      if (produk.stok < 1) {
-        Swal.fire({
-          icon: "error",
-          title: "Stok tidak cukup",
-          text: "Produk ini sedang habis stok",
-          timer: 2000,
-          timerProgressBar: true,
-          showConfirmButton: false,
-        });
-        return prev;
-      }
-      return [...prev, { produk, qty: 1 }];
     });
   };
 
+
   // Quantities state (JS only)
   const [quantities, setQuantities] = useState({});
-  const updateQuantity = (produkId, newQty) => {
+  const updateQuantity = (obatId, newQty) => {
     const finalQty = Math.max(0, newQty);
     if (finalQty === 0) {
       setTransaksi((prev) =>
-        prev.filter((item) => item.produk.id !== produkId)
+        prev.filter((item) => item.obat.id !== obatId)
       );
       setQuantities((prev) => {
         const newQuantities = { ...prev };
-        delete newQuantities[produkId];
+        delete newQuantities[obatId];
         return newQuantities;
       });
     } else {
-      setQuantities((prev) => ({ ...prev, [produkId]: finalQty }));
+      setQuantities((prev) => ({ ...prev, [obatId]: finalQty }));
       setTransaksi((prev) =>
         prev.map((item) =>
-          item.produk.id === produkId ? { ...item, qty: finalQty } : item
+          item.obat.id === obatId ? { ...item, qty: finalQty } : item
         )
       );
     }
   };
-
-  // const tambahTransaksi = (produk: Produk) => {
-  //     setTransaksi((prev) => {
-  //         const index = prev.findIndex(item => item.produk.id === produk.id);
-  //         if (index !== -1) {
-  //             const item = prev[index];
-  //             if (item.qty + 1 > item.produk.stok) {
-  //                 Swal.fire({
-  //                     icon: 'error',
-  //                     title: 'Stok tidak cukup',
-  //                     text: 'Jumlah produk melebihi stok yang tersedia',
-  //                     timer: 2000,
-  //                     timerProgressBar: true,
-  //                     showConfirmButton: false,
-  //                 });
-  //                 return prev; // jangan update
-  //             }
-  //             const update = [...prev];
-  //             update[index].qty += 1;
-  //             return update;
-  //         }
-  //         if (produk.stok < 1) {
-  //             Swal.fire({
-  //                 icon: 'error',
-  //                 title: 'Stok tidak cukup',
-  //                 text: 'Produk ini sedang habis stok',
-  //                 timer: 2000,
-  //                 timerProgressBar: true,
-  //                 showConfirmButton: false,
-  //             });
-  //             return prev;
-  //         }
-  //         return [...prev, { produk, qty: 1 }];
-  //     });
-  // };
-
-  // const [quantities, setQuantities] = useState<{ [key: number]: number }>({});
-  // const updateQuantity = (produkId: number, newQty: number) => {
-  //     const finalQty = Math.max(0, newQty);
-
-  //     if (finalQty === 0) {
-  //         setTransaksi(prev => prev.filter(item => item.produk.id !== produkId));
-
-  //         setQuantities(prev => {
-  //             const newQuantities = { ...prev };
-  //             delete newQuantities[produkId];
-  //             return newQuantities;
-  //         });
-  //     } else {
-  //         setQuantities(prev => ({
-  //             ...prev,
-  //             [produkId]: finalQty
-  //         }));
-
-  //         setTransaksi(prev =>
-  //             prev.map(item =>
-  //                 item.produk.id === produkId
-  //                     ? { ...item, qty: finalQty }
-  //                     : item
-  //             )
-  //         );
-  //     }
-  // };
-
   useEffect(() => {
     if (localStorage.getItem("tipe_user") !== "operator") {
       window.location.href = "/login";
@@ -290,9 +266,8 @@ export default function Operator() {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="currentColor"
-              className={`size-4 ml-2 ${
-                showLogout ? "rotate-180" : ""
-              } transition-transform duration-150 ease-in-out`}
+              className={`size-4 ml-2 ${showLogout ? "rotate-180" : ""
+                } transition-transform duration-150 ease-in-out`}
             >
               <path
                 fillRule="evenodd"
@@ -395,11 +370,10 @@ export default function Operator() {
             >
               <div className="flex gap-2 mb-4">
                 <button
-                  className={`px-3 py-1 rounded ${
-                    selectedKategori === "semua"
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-300"
-                  }`}
+                  className={`px-3 py-1 rounded ${selectedKategori === "semua"
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-300"
+                    }`}
                   onClick={() => setSelectedKategori("semua")}
                 >
                   Semua
@@ -407,11 +381,10 @@ export default function Operator() {
                 {kategori.map((kat) => (
                   <button
                     key={kat.id}
-                    className={`px-3 py-1 rounded w-fit ${
-                      selectedKategori === kat.id
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-300"
-                    }`}
+                    className={`px-3 py-1 rounded w-fit ${selectedKategori === kat.id
+                      ? "bg-red-500 text-white"
+                      : "bg-gray-300"
+                      }`}
                     onClick={() => setSelectedKategori(kat.id)}
                   >
                     {kat.nama_kategori}
@@ -450,8 +423,8 @@ export default function Operator() {
           <div
             className={`grid grid-cols-6 gap-4 mt-4 p-2 [scrollbar-width:thin] overflow-y-auto max-h-[375px] overflow-x-hidden`}
           >
-            {filterNamaProduk && filterNamaProduk.length > 0 ? (
-              filterNamaProduk.map((item) => (
+            {filterNamaObat && filterNamaObat.length > 0 ? (
+              filterNamaObat.map((item) => (
                 <div
                   key={item.id}
                   onClick={() => tambahTransaksi(item)}
@@ -459,19 +432,16 @@ export default function Operator() {
                 >
                   <img
                     src={`/logo/${item.gambar}`}
-                    alt={item.nama}
+                    alt={item.nama_obat}
                     className={`object-cover w-full h-20 rounded-t-sm`}
                   />
                   <div className={`p-2 rounded-b-sm`}>
                     <p
                       className={`text-gray-600 text-sm font-semibold truncate`}
                     >
-                      {item.nama}
+                      {item.nama_obat}
                     </p>
-                    <p className={`text-gray-500 text-xs`}>
-                      Rp. {item.harga.toLocaleString("id-ID")}
-                    </p>
-                    <p className={`text-gray-600 text-xs`}>Stok: {item.stok}</p>
+                    <p className={`text-gray-600 text-xs`}>Stok: {item.stock_dengan_satuan}</p>
                   </div>
                 </div>
               ))
@@ -511,16 +481,10 @@ export default function Operator() {
               <thead className="text-xs text-black uppercase bg-gray-100">
                 <tr>
                   <th scope="col" className="px-4 py-3 w-1/5">
-                    Product
+                    Nama Obat
                   </th>
                   <th scope="col" className="px-4 py-3 w-1/5 text-center">
                     Qty
-                  </th>
-                  <th scope="col" className="px-4 py-3 w-1/5">
-                    Unit&nbsp;Price
-                  </th>
-                  <th scope="col" className="px-4 py-3 w-1/5">
-                    Total&nbsp;Price
                   </th>
                 </tr>
               </thead>
@@ -534,17 +498,20 @@ export default function Operator() {
                       scope="row"
                       className="px-6 py-4 font-medium text-black whitespace-normal truncate overflow-hidden max-w-40"
                     >
-                      {item.produk.nama}
+                      {item.obat.nama_obat}
                     </th>
                     <td className="px-6 py-4 whitespace-normal">
                       <div className="flex items-center w-full">
                         <svg
-                          onClick={() =>
+                          onClick={() => {
+                            const parts = item.obat.stock_dengan_satuan?.split(" ") || [];
+                            const satuan = parts[1]?.toLowerCase() || "";
+                            const step = satuan === "ml" ? 5 : 1;
                             updateQuantity(
-                              item.produk.id,
-                              (quantities[item.produk.id] || item.qty) - 1
+                              item.obat.id,
+                              (quantities[item.obat.id] || item.qty) - step
                             )
-                          }
+                          }}
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
                           fill="currentColor"
@@ -556,14 +523,35 @@ export default function Operator() {
                             clipRule="evenodd"
                           />
                         </svg>
-                        <p>{quantities[item.produk.id] || item.qty}</p>
+                        <p className="text-center text-sm">
+                          {item.qty}{" "}
+                          {item.obat.stock_dengan_satuan?.split(" ")[1] || "pcs"}
+                        </p>
                         <svg
-                          onClick={() =>
-                            updateQuantity(
-                              item.produk.id,
-                              (quantities[item.produk.id] || item.qty) + 1
-                            )
-                          }
+                          onClick={() => {
+                            const parts = item.obat.stock_dengan_satuan?.split(" ") || [];
+                            const stok = parts[0] ? parseInt(parts[0], 10) : 0; // stok angka
+                            const satuan = parts[1]?.toLowerCase() || "";
+                            const step = satuan === "ml" ? 5 : 1;
+
+                            const currentQty = quantities[item.obat.id] || item.qty;
+
+                            if (currentQty + step > stok) {
+                              Swal.fire({
+                                icon: "error",
+                                title: "Stok tidak cukup",
+                                text: "Jumlah Obat melebihi stok yang tersedia",
+                                timer: 2000,
+                                timerProgressBar: true,
+                                showConfirmButton: false,
+                              });
+                              return; // hentikan update
+                            }
+
+                            updateQuantity(item.obat.id, currentQty + step);
+
+                          }}
+
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
                           fill="currentColor"
@@ -577,39 +565,8 @@ export default function Operator() {
                         </svg>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-normal">
-                      Rp.&nbsp;{item.produk.harga.toLocaleString("id-ID")}
-                    </td>
-                    <td className="px-6 py-4 whitespace-normal">
-                      Rp.&nbsp;
-                      {(
-                        item.produk.harga *
-                        (Number(quantities[item.produk.id] || item.qty) ||
-                          item.qty)
-                      ).toLocaleString("id-ID")}
-                    </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="border border-gray-300 bg-gray-100 font-bold w-full absolute bottom-28">
-            <table className="w-full">
-              <tbody>
-                <tr>
-                  <td colSpan={3} className="px-6 py-4 text-left text-black">
-                    Subtotal
-                  </td>
-                  <td className="text-right px-6 py-4 text-black">
-                    Rp.{" "}
-                    {transaksi
-                      .reduce(
-                        (total, item) => total + item.produk.harga * item.qty,
-                        0
-                      )
-                      .toLocaleString("id-ID")}
-                  </td>
-                </tr>
               </tbody>
             </table>
           </div>
