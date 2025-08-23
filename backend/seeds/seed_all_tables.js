@@ -11,10 +11,14 @@ exports.seed = async function (knex) {
 
   // Seed user
   await knex("tbl_user").insert([
-    { id_user: 1, username: "operator", password: "admin", tipe_user: "Admin" },
+    { id_user: 1, 
+      username: "admin", 
+      password: "admin", 
+      tipe_user: "admin" 
+    },
     {
       id_user: 2,
-      username: "aminnnn",
+      username: "amin",
       password: "operator",
       tipe_user: "operator",
     },

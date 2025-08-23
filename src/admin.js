@@ -29,33 +29,33 @@ function Admin() {
 
   useEffect(() => {
     if (localStorage.getItem("isLogin") !== "true") {
-      window.location.href = "/";
+      navigate('/');
+      return;
     }
-  }, []);
 
-    useEffect(() => {
-    if (userType !== "Admin") {
-      navigate('/'); // arahkan ke halaman home atau login
-      Swal.fire({
-        icon: 'error',
-        title: 'Akses Ditolak',
-        text: 'Anda tidak memiliki akses ke halaman ini.',
-      })
-    }
-  }, []);
+    switch (userType) {
+      case "admin":
+        // boleh masuk halaman ini
+        break;
 
-  useEffect(() => {
-    if (localStorage.getItem("showLoginSuccess") === "true") {
-      Swal.fire({
-        icon: 'success',
-        title: 'Login Berhasil!',
-        text: 'Selamat datang!',
-        timer: 1500,
-        showConfirmButton: false
-      });
-      localStorage.removeItem("showLoginSuccess");
+      case "operator":
+        navigate('/operator');
+        Swal.fire({
+          icon: 'error',
+          title: 'Akses Ditolak',
+          text: 'Halaman ini hanya untuk admin.',
+        });
+        break;
+
+      default:
+        navigate('/');
+        Swal.fire({
+          icon: 'error',
+          title: 'Akses Ditolak',
+          text: 'Anda tidak memiliki akses ke halaman ini.',
+        });
     }
-  }, []);
+  }, [navigate, userType]);
 
   const funcSearch = (e) => {
     setSearch(e.target.value);
@@ -102,7 +102,7 @@ function Admin() {
         />
       </div>
 
-      <div className={`${nav ? 'w-full ml-16' : 'w-5/6 lg:ml-58 md:ml-40 sm:ml-30'} mt-58 sm:mt-0 transition-all duration-300 ease-in-out h-full flex flex-col`}>
+      <div className={`${nav ? 'w-full ml-16' : 'w-5/6 lg:ml-63 md:ml-40 sm:ml-30'} mt-58 sm:mt-0 transition-all duration-300 ease-in-out h-full flex flex-col`}>
         <div className="w-full flex mb-2 items-center">
           <div className="flex">
             <Button color="white items-center sm:block hidden" onClick={toggleNav}>
@@ -125,7 +125,7 @@ function Admin() {
             <div className="flex ml-6 w-full mr-40">
               <input
                 onKeyUp={funcSearch}
-                placeholder="Cari daftar kunjungan"
+                placeholder=" kunjungan"
                 className="bg-white w-full shadow-md focus:outline-0 px-2 rounded-sm"
               />
               <input

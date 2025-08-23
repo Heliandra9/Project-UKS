@@ -32,7 +32,7 @@ function App() {
         body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
       });
       const data = await response.json();
-      if (data.status === "sukses" && data.tipe_user === "Admin") {
+      if (data.status === "sukses" && data.tipe_user === "admin") {
         localStorage.setItem("isLogin", "true");
         localStorage.setItem("username", data.username);
         localStorage.setItem("tipe_user", data.tipe_user);
@@ -58,7 +58,7 @@ function App() {
     }
   };
   useEffect(() => {
-    if (localStorage.getItem("isLogin") === "true" && localStorage.getItem("tipe_user") === "Admin") {
+    if (localStorage.getItem("isLogin") === "true" && localStorage.getItem("tipe_user") === "admin") {
       navigate("/admin");
     }else if (localStorage.getItem("isLogin") === "true" && localStorage.getItem("tipe_user") === "operator") {
       navigate("/operator");

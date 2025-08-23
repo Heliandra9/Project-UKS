@@ -447,7 +447,7 @@ function Modal(props) {
           ? [
             { name: "kelas", label: "Kelas" },
             { name: "id_siswa", label: "Nama" },
-            { name: "tanggal", label: "Tanggal" },
+            ...(props.name === "edit" ? [{ name: "tanggal", label: "Tanggal" }] : []),
             { name: "keluhan", label: "Keluhan siswa" },
             { name: "obat", label: "Resep Diberikan" },
             { name: "keterangan", label: "Keterangan" },
@@ -480,7 +480,6 @@ function Modal(props) {
     kunjungan: {
       kelas: "",
       id_siswa: "",
-      tanggal: "",
       keluhan: "",
       obat: [], // array obat dengan properti id_obat, nama, jumlah, satuan
       keterangan: "",
@@ -643,7 +642,7 @@ function Modal(props) {
                         </option>
                       ))}
                     </select>
-                  ) : field.name === "tanggal" ? (
+                  ) : field.name === "tanggal" && props.name === "edit" ? (
                     <input
                       type="date"
                       name="tanggal"
