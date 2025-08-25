@@ -13,6 +13,9 @@ export default function Operator() {
   const [idSiswa, setIdSiswa] = useState("");
   const [keluhan, setKeluhan] = useState("");
   const [showLogout, setShowLogout] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [cetakSurat, setCetakSurat] = useState("tidak"); // default
+
 
   const navigate = useNavigate();
   const userType = localStorage.getItem("tipe_user");
@@ -55,12 +58,12 @@ export default function Operator() {
   };
 
   useEffect(() => {
-    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=obat")
       .then((res) => res.json())
       .then((data) => setObat(data))
       .catch((err) => console.error("Gagal ambil data obat:", err));
 
-    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=siswa")
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=siswa")
       .then((res) => res.json())
       .then((data) => setSiswa(data))
       .catch((err) => console.error("Gagal ambil data siswa:", err));
@@ -156,7 +159,7 @@ export default function Operator() {
       keterangan: "ditambahkan oleh operator"
     };
 
-    fetch("http://localhost/amin/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan", {
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams(dataPasien).toString()
@@ -194,9 +197,87 @@ export default function Operator() {
   };
 
   return (
-    <div className="flex flex-col lg:h-screen 
-  bg-gradient-to-br from-green-300 via-green-100 to-green-500 
-  pb-24 lg:pb-0">
+    <div className="flex flex-col lg:h-screen bg-gradient-to-br from-green-300 via-green-100 to-green-500 pb-24 lg:pb-0">
+      {/* Modal Konfirmasi */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-lg">
+            <h2 className="text-lg font-bold text-green-700 mb-4">Konfirmasi Data Pasien</h2>
+
+            {/* Detail Pasien */}
+            <div className="mb-3">
+              <p><span className="font-semibold">Kelas:</span> {kelas}</p>
+              <p><span className="font-semibold">Siswa:</span> {siswa.find(s => s.id === idSiswa)?.nama || "-"}</p>
+              <p><span className="font-semibold">Keluhan:</span> {keluhan}</p>
+            </div>
+
+            {/* List Obat */}
+            <div className="mb-3">
+              <p className="font-semibold mb-1">Resep Obat:</p>
+              <ul className="list-disc pl-5 text-sm">
+                {transaksi.map((item) => (
+                  <li key={item.obat.id}>
+                    {item.obat.nama_obat} - {item.qty} {item.obat.stock_dengan_satuan.split(" ")[1]}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Radio Cetak Surat */}
+            <div className="mb-4">
+              <p className="font-semibold">Cetak Surat Sakit?</p>
+              <div className="flex gap-4 mt-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="cetakSurat"
+                    value="ya"
+                    checked={cetakSurat === "ya"}
+                    onChange={(e) => setCetakSurat(e.target.value)}
+                  />
+                  Ya
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="cetakSurat"
+                    value="tidak"
+                    checked={cetakSurat === "tidak"}
+                    onChange={(e) => setCetakSurat(e.target.value)}
+                  />
+                  Tidak
+                </label>
+              </div>
+            </div>
+
+            {/* Tombol Aksi */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  handleTambahPasien();
+
+                  if (cetakSurat === "ya") {
+                    const pemeriksa = encodeURIComponent(localStorage.getItem("username") || "-");
+                    // arahkan ke cetak surat sakit (Word/PDF)
+                    window.open(`http://localhost/pkl/Project-UKS/backend/proses/cetak_surat.php?id_siswa=${idSiswa}&pemeriksa=${pemeriksa}`, "_blank");
+                  }
+                }}
+                className="px-4 py-2 rounded bg-green-500 text-white font-bold hover:bg-green-600"
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Header */}
       <header className="sticky top-0 z-50 p-4 bg-green-500 text-white flex justify-between items-center flex-shrink-0 shadow-md">
@@ -380,7 +461,18 @@ export default function Operator() {
         {/* Konfirmasi */}
         <div className="bg-white/30 backdrop-blur-md rounded-2xl p-4 shadow-rounded-2xl border border-green-500 flex items-center justify-center flex-shrink-0">
           <button
-            onClick={handleTambahPasien}
+            onClick={() => {
+              if (!kelas || !idSiswa || !keluhan.trim() || transaksi.length === 0) {
+                Swal.fire({
+                  icon: "warning",
+                  title: "Data pasien belum lengkap!",
+                  text: "Silakan isi kelas, siswa, keluhan, dan resep obat terlebih dahulu.",
+                });
+              } else {
+                setShowModal(true);
+              }
+            }
+            }
             className="w-full py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 disabled:opacity-50"
           >
             KONFIRMASI
@@ -525,7 +617,18 @@ export default function Operator() {
           {/* Konfirmasi Sticky di Bawah */}
           <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/90 backdrop-blur-md border-t border-green-300 shadow-md">
             <button
-              onClick={handleTambahPasien}
+              onClick={() => {
+                if (!kelas || !idSiswa || !keluhan.trim() || transaksi.length === 0) {
+                  Swal.fire({
+                    icon: "warning",
+                    title: "Data pasien belum lengkap!",
+                    text: "Silakan isi kelas, siswa, keluhan, dan resep obat terlebih dahulu.",
+                  });
+                } else {
+                  setShowModal(true);
+                }
+              }
+              }
               className="w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700"
             >
               KONFIRMASI
