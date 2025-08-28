@@ -1,4 +1,4 @@
-import {Card, Chart} from "../component/Component";
+import {Card, Chart} from "../Component";
 
 const data = [
   { bgColor: "green-300", text: "black",iconColor:"green-600",  icon:"bi bi-person-fill", title: "Data siswa", description: "600" },

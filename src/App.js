@@ -1,6 +1,6 @@
-import logo from "./component/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.png";
+import logo from "./component(admin)/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.png";
 import { useState, useEffect } from "react";
-import { FormFloating, Button } from "./component/Component";
+import { FormFloating, Button } from "./component(admin)/Component";
 import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import "./App.css";
@@ -26,7 +26,7 @@ function App() {
       return;
     }
     try {
-      const response = await fetch("http://localhost/pkl/Project-UKS/backend/proses/login.php", {
+      const response = await fetch("http://localhost/amin/Project-UKS/backend/proses/login.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`

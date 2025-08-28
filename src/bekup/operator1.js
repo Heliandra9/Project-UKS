@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button } from "../component/Component";
+import { Button } from "../Component";
 import { useNavigate } from "react-router-dom";
 
 const availableMedicines = [

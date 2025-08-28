@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Button, SideBar } from "./component/Component";
-import logo from "./component/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.png";
-import Home from "./view/home";
-import Siswa from "./view/data_siswa";
-import Obat from "./view/data_obat";
-import User from "./view/data_user";
-import Kunjungan from "./view/daftar_kunjungan";
+import { Button, SideBar } from "./component(admin)/Component";
+import logo from "./component(admin)/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.png";
+import Home from "./component(admin)/view/home";
+import Siswa from "./component(admin)/view/data_siswa";
+import Obat from "./component(admin)/view/data_obat";
+import User from "./component(admin)/view/data_user";
+import Kunjungan from "./component(admin)/view/daftar_kunjungan";
 import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import './App.css';
@@ -31,6 +31,18 @@ function Admin() {
     if (localStorage.getItem("isLogin") !== "true") {
       navigate('/');
       return;
+    } else {
+      if (localStorage.getItem("showLoginSuccess") === "true") {
+        Swal.fire({
+          icon: "success",
+          title: "Login Berhasil!",
+          text: `Selamat datang ${localStorage.getItem("username")}`,
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          localStorage.removeItem("showLoginSuccess");
+        });
+      }
     }
 
     switch (userType) {

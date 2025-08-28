@@ -1,4 +1,4 @@
-import { Table, Modal } from "../component/Component";
+import { Table, Modal } from "../Component";
 import { useState, useEffect } from "react";
 import Swal from 'sweetalert2';
 
@@ -8,7 +8,7 @@ function User(props) {
   const [user, setUser] = useState([]);
 
   const getDataUser = () => {
-    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=user")
+    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=user")
       .then(res => res.json())
       .then(data => {
         setUser(data);
@@ -58,13 +58,13 @@ function User(props) {
 
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=user";
+            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_tambah.php?type=user";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php?type=user";
+            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_edit.php?type=user";
             formBody.append("id", props.data.id_user); // pastikan props.data.id tersedia
           } else if (props.modalName === "delete") {
 
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php";
+            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_hapus.php";
             formBody.set("id", props.data.id_user); // gunakan ID sebagai identifier
             formBody.set("type", "user"); // <-- Tambahkan ini
 
