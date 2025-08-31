@@ -5,7 +5,9 @@ export default function Topbar({ view, setView }) {
     const [showMenu, setShowMenu] = useState(false);
     const [showLogout, setShowLogout] = useState(false);
     const navigate = useNavigate();
-
+    const navBtn = "px-4 py-2 rounded-xl font-medium transition-all duration-300";
+    const activeBtn = "bg-white text-green-600 font-semibold shadow-md scale-105";
+    const normalBtn = "hover:text-green-200 hover:underline underline-offset-4";
     const logout = () => {
         localStorage.setItem("isLogin", "false");
         localStorage.removeItem("username");
@@ -14,16 +16,6 @@ export default function Topbar({ view, setView }) {
         localStorage.setItem("showLogoutSuccess", "true");
         navigate("/");
     };
-
-    const navBtn =
-        "px-4 py-2 rounded-xl font-medium transition-all duration-300";
-    const activeBtn =
-        "bg-white text-green-600 font-semibold shadow-md scale-105";
-    const normalBtn =
-        "hover:text-green-200 hover:underline underline-offset-4";
-
-
-
 
     return (
         <header className="shadow-lg sticky top-0 z-50 bg-green-500 text-white">

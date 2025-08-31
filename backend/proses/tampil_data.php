@@ -31,15 +31,21 @@ if ($type === 'obat') {
                 k.tanggal,
                 k.keluhan,
                 k.keterangan,
-                o.id AS id_obat,
-                o.nama_obat AS nama_obat_kunjungan,
-                t.qty,
-                t.tanggal_kunjungan
+                GROUP_CONCAT(CONCAT(o.nama_obat, ' (', t.qty, ')') SEPARATOR ', ') AS obat_dengan_qty
             FROM tbl_kunjungan k
             JOIN tbl_siswa s ON k.id_siswa = s.id
             LEFT JOIN tbl_transaksi_obat t ON k.id = t.id_kunjungan
             LEFT JOIN tbl_obat o ON t.id_obat = o.id
-            ORDER BY k.id DESC;";
+            GROUP BY 
+                k.id, 
+                k.id_siswa, 
+                s.nama, 
+                s.kelas, 
+                k.tanggal, 
+                k.keluhan, 
+                k.keterangan
+            ORDER BY k.id DESC;
+            ";
 
     $result = $db->query($sql);
     if (!$result) {

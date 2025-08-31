@@ -6,7 +6,14 @@ import KunjunganView from "./component(operator)/view/Kunjungan";
 
 export default function Operator() {
 
-  const [view, setView] = useState("tambah");
+  const [view, setView] = useState(() => {
+    return localStorage.getItem("view") || "tambah";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("view", view);
+  }, [view]);
+
 
   return (
     <div className="flex flex-col lg:h-screen pb-24 lg:pb-0">
