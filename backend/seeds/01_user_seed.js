@@ -18,5 +18,11 @@ exports.seed = async function(knex) {
       password: "operator",
       tipe_user: "operator",
     },
+    {
+      id_user: 3,
+      username: "amingudang",
+      password: "gudang",
+      tipe_user: "gudang",
+    },
   ]);
 };

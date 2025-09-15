@@ -14,7 +14,7 @@ exports.up = function (knex) {
       .onDelete("CASCADE");
     table.text("keluhan");
     table.timestamp("tanggal").defaultTo(knex.fn.now());
-    table.text("keterangan").notNullable();
+    // 👉 kolom keterangan dihapus
   });
 };
 

@@ -59,11 +59,11 @@ export default function TambahPasien() {
     }, [navigate]);
 
     useEffect(() => {
-        fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
+        fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=obat")
             .then((res) => res.json())
             .then((data) => setObat(data));
 
-        fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=siswa")
+        fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=siswa")
             .then((res) => res.json())
             .then((data) => setSiswa(data));
     }, []);
@@ -152,7 +152,7 @@ export default function TambahPasien() {
             keterangan: "ditambahkan oleh operator"
         };
 
-        fetch("http://localhost/amin/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan", {
+        fetch("http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams(dataPasien).toString()
@@ -258,7 +258,7 @@ export default function TambahPasien() {
                                         if (cetakSurat === "ya") {
                                             const pemeriksa = encodeURIComponent(localStorage.getItem("username") || "-");
                                             // arahkan ke cetak surat sakit (Word/PDF)
-                                            window.open(`http://localhost/amin/Project-UKS/backend/proses/cetak_surat.php?id_siswa=${idSiswa}&pemeriksa=${pemeriksa}`, "_blank");
+                                            window.open(`http://localhost/pkl/Project-UKS/backend/proses/cetak_surat.php?id_siswa=${idSiswa}&pemeriksa=${pemeriksa}`, "_blank");
                                         }
                                     }}
                                     className="px-4 py-2 rounded bg-green-500 text-white font-bold hover:bg-green-600"
@@ -271,12 +271,12 @@ export default function TambahPasien() {
                 )
             }
 
-            <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+            <main className="flex-1 p-4 flex flex-col gap-4 overflow-hidden bg-green-50">
 
                 {/* ======= Layout Desktop ======= */}
-                <div className="hidden lg:grid lg:grid-cols-3 gap-4 flex-1 overflow-hidden">
+                <div className="hidden lg:grid lg:grid-cols-3 gap-4 flex-1 overflow-hidden shadow-xl">
                     {/* Form Pasien */}
-                    <div className="lg:col-span-1 bg-white/30 backdrop-blur-md rounded-xl p-4 shadow-rounded-xl border border-green-500 flex flex-col gap-3 overflow-auto">
+                    <div className="lg:col-span-1 bg-white backdrop-blur-md rounded-xl p-4 shadow-xl flex flex-col gap-3 overflow-auto">
                         <h2 className="font-semibold text-lg text-green-700">Form Pasien</h2>
                         <select
                             value={kelas}
@@ -322,7 +322,7 @@ export default function TambahPasien() {
                     </div>
 
                     {/* List Obat */}
-                    <div className="lg:col-span-2 bg-white/30 backdrop-blur-md rounded-xl p-4 shadow-rounded-xl border border-green-500 flex flex-col overflow-hidden">
+                    <div className="lg:col-span-2 bg-white backdrop-blur-md rounded-xl p-4 shadow-xl flex flex-col overflow-hidden">
                         <h2 className="font-semibold text-lg text-green-700 mb-2">List Obat</h2>
                         <input
                             type="text"
@@ -337,7 +337,7 @@ export default function TambahPasien() {
                                     <div
                                         key={o.id}
                                         onClick={() => tambahTransaksi(o)}
-                                        className="cursor-pointer border border-green-200 rounded-xl p-3 flex flex-col items-center hover:shadow-md hover:scale-[1.02] transition bg-white"
+                                        className="cursor-pointer border border-green-200 rounded-xl p-3 flex flex-col items-center hover:shadow-md hover:scale-[1.02] transition bg-green-50"
                                     >
                                         <img
                                             src={`/logo/${o.gambar}`}
@@ -356,7 +356,7 @@ export default function TambahPasien() {
                 </div>
 
                 {/* Resep */}
-                <div className="hidden lg:flex bg-white/30 backdrop-blur-md rounded-2xl p-4 shadow-rounded-2xl border border-green-500 flex-col gap-3 h-40 flex-shrink-0">
+                <div className="hidden lg:flex bg-white rounded-2xl p-4 shadow-2xl flex-col gap-3 h-40 flex-shrink-0">
                     <h2 className="font-semibold text-lg text-green-700">Resep Diberikan</h2>
                     <div className="flex gap-4 overflow-x-auto">
                         {transaksi.length ? (
@@ -413,7 +413,7 @@ export default function TambahPasien() {
                 </div>
 
                 {/* Konfirmasi */}
-                <div className="hidden lg:flex bg-white/30 backdrop-blur-md rounded-2xl p-4 shadow-rounded-2xl border border-green-500 items-center justify-center flex-shrink-0">
+                <div className="hidden lg:flex bg-white/eackdrop-blur-md rounded-2xl p-4 shadow-2xl items-center justify-center flex-shrink-0">
                     <button
                         onClick={() => {
                             if (!kelas || !idSiswa || !keluhan.trim() || transaksi.length === 0) {

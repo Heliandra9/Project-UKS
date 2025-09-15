@@ -13,7 +13,7 @@ function Kunjungan(props) {
   // Ambil data obat & set form awal
   useEffect(() => {
     if (props.view === "kunjungan") {
-      fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
+      fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=obat")
         .then((res) => res.json())
         .then((data) => setDataObat(data))
         .catch((err) => console.error("Gagal ambil data obat:", err));
@@ -27,7 +27,7 @@ function Kunjungan(props) {
   }, [props.data, props.statE]);
 
   const getDataKunjungan = () => {
-    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=kunjungan")
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=kunjungan")
       .then(res => res.json())
       .then(data => {
         setKunjungan(data);
@@ -36,7 +36,7 @@ function Kunjungan(props) {
       .catch(err => console.error("Gagal ambil data kunjungan:", err));
   }
   const getDataSiswa = () => {
-    fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=siswa")
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=siswa")
       .then(res => res.json())
       .then(data => {
         setSiswa(data);
@@ -96,11 +96,11 @@ function Kunjungan(props) {
 
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_edit.php";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php";
           } else if (props.modalName === "delete") {
-            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_hapus.php?type=kunjungan";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php?type=kunjungan";
             formBody.delete("kode_kunjungan");
             formBody.delete("nama_kunjungan");
             formBody.delete("jenis_kunjungan");
@@ -146,7 +146,8 @@ function Kunjungan(props) {
                   icon: 'error',
                   title: 'Gagal!',
                   text: result.message || 'Terjadi kesalahan',
-                  showConfirmButton: true
+                  showConfirmButton: true,
+                  console: console.log(result)
                 });
               }
               console.log("Data obat dikirim:", result);

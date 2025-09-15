@@ -20,6 +20,21 @@ ChartJS.register(
   Legend
 );
 
+function formatTanggalDB(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+
 function Card(props) {
   return (
     <div
@@ -271,8 +286,8 @@ function Table(props) {
             ? (item.nama_siswa && item.nama_siswa.toLowerCase().includes(keyword)) ||
             (item.kelas && item.kelas.toLowerCase().includes(keyword)) ||
             (item.keluhan && item.keluhan.toLowerCase().includes(keyword)) ||
-            (item.tanggal_kunjungan && item.tanggal_kunjungan.toLowerCase().includes(keyword)) ||
-            (item.nama_obat_kunjungan && item.nama_obat_kunjungan.toLowerCase().includes(keyword)) ||
+            (item.tanggal && item.tanggal.includes(keyword)) ||
+            (item.obat_dengan_qty && item.obat_dengan_qty.toLowerCase().includes(keyword)) ||
             (item.keterangan && item.keterangan.toLowerCase().includes(keyword))
             : false;
   });
@@ -312,7 +327,6 @@ function Table(props) {
                 <th scope="col" className="px-6 py-3">Tanggal Kunjungan</th>
                 <th scope="col" className="px-6 py-3">Keterangan</th>
                 <th scope="col" className="px-6 py-3">Resep Obat Diberikan</th>
-                <th scope="col" className="px-6 py-3">Qty Obat</th>
                 <th scope="col" className="px-6 py-3">Aksi</th>
               </>
             ) : props.view === "user" ? (
@@ -377,11 +391,9 @@ function Table(props) {
                     <td className="px-6 py-4 capitalize">{item.nama_siswa}</td>
                     <td className="px-6 py-4 uppercase">{item.kelas}</td>
                     <td className="px-6 py-4">{item.keluhan}</td>
-                    <td className="px-6 py-4">{item.nama_obat_kunjungan || "-"}</td>
-                    <td className="px-6 py-4">{item.tanggal}</td> {/* tanggal kunjungan */}
-                    <td className="px-6 py-4">{item.qty || '-'}</td> {/* qty obat */}
-                    <td className="px-6 py-4">{item.tanggal_kunjungan || '-'}</td> {/* tanggal obat */}
+                    <td className="px-6 py-4">{formatTanggalDB(item.tanggal) || "-"}</td>
                     <td className="px-6 py-4">{item.keterangan}</td>
+                    <td className="px-6 py-4">{item.obat_dengan_qty}</td> {/* tanggal kunjungan */}
 
                   </>
                 ) : props.view === "user" ? (
@@ -435,8 +447,7 @@ function Modal(props) {
         { name: "golongan_darah", label: "Golongan Darah" },
       ]
       : props.view === "obat"
-        ? [
-          { name: "id_obat", label: "ID Obat", hidden: true }, // opsional tanda hidden
+        ? [ // opsional tanda hidden
           { name: "nama_obat", label: "Nama Obat" },
           { name: "kode_obat", label: "Kode Obat" },
           { name: "kandungan", label: "Kandungan Obat" },

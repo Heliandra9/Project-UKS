@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Admin from './admin';
 import Operator from './operator';
+import Gudang from './gudang';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -15,6 +16,7 @@ root.render(
         <Route path="/" element={<App />} />
         <Route path="/admin" element={<Admin />} />        
         <Route path="/operator" element={<Operator />} />        
+        <Route path="/gudang" element={<Gudang />} />        
       </Routes>
     </Router>
   </React.StrictMode>

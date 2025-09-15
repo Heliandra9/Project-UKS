@@ -3,25 +3,34 @@
  * @returns { Promise<void> }
  */
 exports.up = function (knex) {
-    return knex.schema.createTable("tbl_transaksi_obat", (table) => {
-        table.increments("id").primary();
-        table
-        .integer("id_kunjungan")
-        .unsigned()
-        .notNullable()
-        .references("id")
-        .inTable("tbl_kunjungan")
-        .onDelete("CASCADE");
-        table
-        .integer("id_obat")
-        .unsigned()
-        .notNullable()
-        .references("id")
-        .inTable("tbl_obat")
-        .onDelete("CASCADE");
-        table.integer("qty").notNullable();
-        table.timestamp("tanggal_kunjungan").defaultTo(knex.fn.now());
-    });
+  return knex.schema.createTable("tbl_transaksi_obat", (table) => {
+    table.increments("id").primary();
+    table
+      .integer("id_kunjungan")
+      .unsigned()
+      .notNullable()
+      .references("id")
+      .inTable("tbl_kunjungan")
+      .onDelete("CASCADE");
+    table
+      .integer("id_obat")
+      .unsigned()
+      .notNullable()
+      .references("id")
+      .inTable("tbl_obat")
+      .onDelete("CASCADE");
+    table.integer("qty").notNullable();
+    table
+      .enum("jenis_transaksi", ["Masuk", "Keluar"])
+      .notNullable()
+      .comment("Jenis transaksi obat: Masuk atau Keluar");
+    table.text("keterangan").nullable();
+    table.string("petugas", 100).nullable();
+
+    // ✅ kolom tambahan
+    table.timestamp("created_at").defaultTo(knex.fn.now());
+    table.timestamp("updated_at").defaultTo(knex.fn.now());
+  });
 };
 
 /**
@@ -29,5 +38,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-    return knex.schema.dropTableIfExists('tbl_transaksi_obat');
+  return knex.schema.dropTableIfExists("tbl_transaksi_obat");
 };

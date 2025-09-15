@@ -8,11 +8,16 @@ exports.up = function (knex) {
         table.text("nama_obat").notNullable();
         table.string("kode_obat", 100).notNullable();
         table
-        .enu("jenis_obat", ["Tablet", "Sirup", "Kapsul", "Salep"])
-        .notNullable();
+            .enu("jenis_obat", ["Tablet", "Sirup", "Kapsul", "Salep"])
+            .notNullable();
         table.string("kandungan", 100).notNullable();
         table.integer("stock_obat").notNullable();
         table.enu("satuan", ["pcs", "ml"]).notNullable();
+
+        // Soft delete
+        table.boolean("is_deleted").defaultTo(false);
+        // Alternatif: pakai timestamp
+        // table.timestamp("deleted_at").nullable();
     });
 };
 
@@ -21,5 +26,5 @@ exports.up = function (knex) {
  * @returns { Promise<void> }
  */
 exports.down = function (knex) {
-    return knex.schema.dropTableIfExists('tbl_obat');
+    return knex.schema.dropTableIfExists("tbl_obat");
 };

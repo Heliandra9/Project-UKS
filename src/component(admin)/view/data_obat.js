@@ -1,31 +1,32 @@
 import { useState, useEffect } from "react";
-import {Table, Modal} from "../Component";
+import { Table, Modal } from "../Component";
 import Swal from 'sweetalert2';
 
-function Obat(props){
-      const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
-      const [obat, setObat] = useState([]);
+function Obat(props) {
+  const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
+  const [obat, setObat] = useState([]);
 
-      const getDataObat = () => {
-        fetch("http://localhost/amin/Project-UKS/backend/proses/tampil_data.php?type=obat")
-          .then(res => res.json())
-          .then(data => {
-            setObat(data);
-            console.log(data);
-          })
-          .catch(err => console.error("Gagal ambil data obat:", err));
-      }
-      useEffect(() => {
-        getDataObat();
-      }, []);
-    
-      const funcModal = () => {
-        if (props.setModal) {
-          props.setModal(!props.modal);
-        }
-      };
-    return (
-        <div className="w-full h-screen flex">
+  const getDataObat = () => {
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=obat")
+      .then(res => res.json())
+      .then(data => {
+        const aktif = data.filter(item => item.is_deleted === "0");
+        setObat(aktif);
+      })
+
+      .catch(err => console.error("Gagal ambil data obat:", err));
+  }
+  useEffect(() => {
+    getDataObat();
+  }, []);
+
+  const funcModal = () => {
+    if (props.setModal) {
+      props.setModal(!props.modal);
+    }
+  };
+  return (
+    <div className="w-full h-screen flex">
       <Table
         setM={funcModal}
         cari={props.cari}
@@ -52,14 +53,14 @@ function Obat(props){
           for (const key in form) {
             formBody.append(key, form[key]);
           }
-          
+
           let endpoint = "";
           if (props.modalName === "insert") {
-            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_tambah.php?type=obat";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=obat";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_edit.php";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php";
           } else if (props.modalName === "delete") {
-            endpoint = "http://localhost/amin/Project-UKS/backend/proses/proses_hapus.php?type=obat";
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php?type=obat";
             formBody.delete("kode_obat");
             formBody.delete("nama_obat");
             formBody.delete("satuan");
@@ -68,53 +69,53 @@ function Obat(props){
             formBody.append("id", props.data.id);
           }
           formBody.append("type", "obat");
-          
-          
+
+
           fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: formBody.toString()
           })
-          .then(res => res.text())
-          .then(text => {
-            console.log("Response asli:", text);
-            let result;
-            try {
-              result = JSON.parse(text);
-            } catch (e) {
-              throw new Error("Response bukan JSON");
-            }
-            if (result.status === "success") {
-              Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: props.modalName === 'edit'
-                ? 'Data berhasil diubah'
-                : props.modalName === 'delete'
-                ? 'Data berhasil dihapus'
-                : 'Data berhasil ditambahkan',
-                timer: 1500,
-                showConfirmButton: false
-              });
-              
-              
-              getDataObat && getDataObat();
-              props.setModal(false);
-            } else {
-              Swal.fire({
-                icon: 'error',
-                title: 'Gagal!',
-                text: result.message || 'Terjadi kesalahan',
-                showConfirmButton: true
-              });
-            }
-            console.log(result)
-          })
-          .catch(err => console.error("Fetch error:", err));  
+            .then(res => res.text())
+            .then(text => {
+              console.log("Response asli:", text);
+              let result;
+              try {
+                result = JSON.parse(text);
+              } catch (e) {
+                throw new Error("Response bukan JSON");
+              }
+              if (result.status === "success") {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Berhasil!',
+                  text: props.modalName === 'edit'
+                    ? 'Data berhasil diubah'
+                    : props.modalName === 'delete'
+                      ? 'Data berhasil dihapus'
+                      : 'Data berhasil ditambahkan',
+                  timer: 1500,
+                  showConfirmButton: false
+                });
+
+
+                getDataObat && getDataObat();
+                props.setModal(false);
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Gagal!',
+                  text: result.message || 'Terjadi kesalahan',
+                  showConfirmButton: true
+                });
+              }
+              console.log(result)
+            })
+            .catch(err => console.error("Fetch error:", err));
         }}
         view={props.view}
       />
     </div>
-    );
+  );
 }
 export default Obat;

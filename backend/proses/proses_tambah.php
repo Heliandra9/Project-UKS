@@ -26,6 +26,7 @@ if ($type === "obat") {
         sendResponse("error", "Data obat tidak lengkap.");
     }
 
+    // Cek apakah obat sudah ada
     $cek = $db->prepare("SELECT * FROM tbl_obat WHERE kode_obat=?");
     $cek->bind_param("s", $kode_obat);
     $cek->execute();
@@ -34,9 +35,35 @@ if ($type === "obat") {
         sendResponse("error", "Data obat sudah ada.");
     }
 
+    // Insert ke tbl_obat
     $stmt = $db->prepare("INSERT INTO tbl_obat (kode_obat, nama_obat, satuan, kandungan, stock_obat) VALUES (?, ?, ?, ?, ?)");
     $stmt->bind_param("ssssi", $kode_obat, $nama_obat, $satuan, $kandungan, $stock_obat);
+
     if ($stmt->execute()) {
+        // Ambil ID obat yang baru ditambahkan
+        $id_obat = $db->insert_id;
+
+        // Insert ke tbl_transaksi_obat
+        $id_kunjungan = null; // sesuai permintaan
+        $qty = $stock_obat;
+        $jenis_transaksi = "Masuk";
+        $keterangan = "Penambahan stok awal";
+        $petugas = "Admin"; // bisa diganti sesuai session user
+        $created_at = date("Y-m-d H:i:s");
+        $updated_at = date("Y-m-d H:i:s");
+
+        $transaksi = $db->prepare("INSERT INTO tbl_transaksi_obat (id_kunjungan, id_obat, qty, jenis_transaksi, keterangan, petugas, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+
+        // Karena bind_param tidak bisa langsung NULL untuk integer, gunakan trik berikut:
+        if ($id_kunjungan === null) {
+            $transaksi->bind_param("iissssss", $nullVar, $id_obat, $qty, $jenis_transaksi, $keterangan, $petugas, $created_at, $updated_at);
+            $nullVar = null; // bind dengan null
+        } else {
+            $transaksi->bind_param("iiisssss", $id_kunjungan, $id_obat, $qty, $jenis_transaksi, $keterangan, $petugas, $created_at, $updated_at);
+        }
+
+        $transaksi->execute();
+
         sendResponse("success", "Obat berhasil ditambahkan.", [
             "kode_obat" => $kode_obat,
             "nama_obat" => $nama_obat,
@@ -47,6 +74,7 @@ if ($type === "obat") {
     } else {
         sendResponse("error", "Gagal menambahkan obat: " . $stmt->error);
     }
+
 } elseif ($type === "user") {
     $username = $_POST["username"] ?? null;
     $password = $_POST["password"] ?? null;
@@ -77,7 +105,8 @@ if ($type === "obat") {
 } elseif ($type === "kunjungan") {
     $obatRaw = $_POST["obat"] ?? "[]";
     $obat = json_decode($obatRaw, true);
-    if (!is_array($obat)) $obat = [];
+    if (!is_array($obat))
+        $obat = [];
 
     $id_siswa = $_POST["id_siswa"] ?? null;
     $tanggal = $_POST["tanggal"] ?? date('Y-m-d H:i:s');
@@ -98,31 +127,45 @@ if ($type === "obat") {
 
     if (!empty($obat)) {
         // insert ke tbl_transaksi_obat
-        $stmtObat = $db->prepare("INSERT INTO tbl_transaksi_obat (id_kunjungan, id_obat, qty, tanggal_kunjungan) VALUES (?, ?, ?, ?)");
+        $stmtObat = $db->prepare("INSERT INTO tbl_transaksi_obat (id_kunjungan, id_obat, qty, jenis_transaksi) VALUES (?, ?, ?, ?)");
+        if (!$stmtObat) {
+            echo json_encode(["status" => "error", "message" => "Prepare insert transaksi obat gagal: " . $db->error]);
+            exit;
+        }
+
         // update jumlah obat di tbl_obat
         $stmtUpdateStock = $db->prepare("UPDATE tbl_obat SET stock_obat = stock_obat - ? WHERE id = ?");
         if (!$stmtUpdateStock) {
             echo json_encode(["status" => "error", "message" => "Prepare update stock gagal: " . $db->error]);
             exit;
         }
+
         foreach ($obat as $o) {
             $id_obat = $o['id_obat'] ?? null;
             $qty = $o['jumlah'] ?? 0;
-            if (!$id_obat || $qty <= 0) continue;
-            $stmtObat->bind_param("iiis", $id_kunjungan, $id_obat, $qty, $tanggal);
+            $jenis = $o['jenis'] ?? "Keluar"; // default keluar (misal resep diberikan ke siswa)
+
+            if (!$id_obat || $qty <= 0)
+                continue;
+
+            // Insert transaksi obat
+            $stmtObat->bind_param("iiis", $id_kunjungan, $id_obat, $qty, $jenis);
             if (!$stmtObat->execute()) {
                 echo json_encode(["status" => "error", "message" => "Gagal insert transaksi obat: " . $stmtObat->error]);
                 exit;
             }
 
-            // Update stock obat
-            $stmtUpdateStock->bind_param("ii", $qty, $id_obat);
-            if (!$stmtUpdateStock->execute()) {
-                echo json_encode(["status" => "error", "message" => "Gagal update stock obat: " . $stmtUpdateStock->error]);
-                exit;
+            // Update stock obat (hanya jika keluar)
+            if ($jenis === "Keluar") {
+                $stmtUpdateStock->bind_param("ii", $qty, $id_obat);
+                if (!$stmtUpdateStock->execute()) {
+                    echo json_encode(["status" => "error", "message" => "Gagal update stock obat: " . $stmtUpdateStock->error]);
+                    exit;
+                }
             }
         }
     }
+
 
     sendResponse("success", "Kunjungan berhasil ditambahkan.", [
         "id_kunjungan" => $id_kunjungan,

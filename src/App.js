@@ -26,7 +26,7 @@ function App() {
       return;
     }
     try {
-      const response = await fetch("http://localhost/amin/Project-UKS/backend/proses/login.php", {
+      const response = await fetch("http://localhost/pkl/Project-UKS/backend/proses/login.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
@@ -44,6 +44,12 @@ function App() {
         localStorage.setItem("tipe_user", data.tipe_user);
         localStorage.setItem("showLoginSuccess", "true");
         navigate("/operator");
+      } else if (data.status === "sukses" && data.tipe_user === "gudang") {
+        localStorage.setItem("isLogin", "true");
+        localStorage.setItem("username", data.username);
+        localStorage.setItem("tipe_user", data.tipe_user);
+        localStorage.setItem("showLoginSuccess", "true");
+        navigate("/gudang");
       } else {
         setData(data.message);
         Swal.fire({
@@ -60,8 +66,10 @@ function App() {
   useEffect(() => {
     if (localStorage.getItem("isLogin") === "true" && localStorage.getItem("tipe_user") === "admin") {
       navigate("/admin");
-    }else if (localStorage.getItem("isLogin") === "true" && localStorage.getItem("tipe_user") === "operator") {
+    } else if (localStorage.getItem("isLogin") === "true" && localStorage.getItem("tipe_user") === "operator") {
       navigate("/operator");
+    } else if (localStorage.getItem("isLogin") === "true" && localStorage.getItem("tipe_user") === "gudang") {
+      navigate("/gudang");
     }
   }, [navigate]);
   useEffect(() => {
