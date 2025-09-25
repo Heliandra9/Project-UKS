@@ -28,14 +28,15 @@ if ($type === "siswa") {
     $satuan = $_POST["satuan"] ?? null;
     $kandungan = $_POST["kandungan"] ?? null;
     $stock_obat = $_POST["stock_obat"] ?? null;
+    $jenis_obat = $_POST["jenis_obat"] ?? null; // Tambahkan ini
 
-    if (!$kode_obat || !$nama_obat || !$satuan || !$kandungan || !$stock_obat) {
+    if (!$kode_obat || !$nama_obat || !$satuan || !$kandungan || !$stock_obat || !$jenis_obat) {
         echo json_encode(["status" => "error", "message" => "Data obat tidak lengkap."]);
         exit;
     }
 
-    $stmt = $db->prepare("UPDATE tbl_obat SET nama_obat=?, satuan=?, kandungan=?, stock_obat=? WHERE kode_obat=?");
-    $stmt->bind_param("sssis", $nama_obat, $satuan, $kandungan, $stock_obat, $kode_obat);
+    $stmt = $db->prepare("UPDATE tbl_obat SET nama_obat=?, satuan=?, kandungan=?, stock_obat=?, jenis_obat=? WHERE kode_obat=?");
+    $stmt->bind_param("sssiss", $nama_obat, $satuan, $kandungan, $stock_obat, $jenis_obat, $kode_obat);
 } elseif ($type === "user") {
     $id_user = $_POST["id_user"] ?? null;
     $username = $_POST["username"] ?? null;

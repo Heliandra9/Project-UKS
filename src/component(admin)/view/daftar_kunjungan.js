@@ -1,96 +1,122 @@
 import { useState, useEffect } from "react";
 import { Table, Modal } from "../Component";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 function Kunjungan(props) {
-  const [modalName, setModalName] = useState(props.modalName ? "insert" : "");
-  const [kunjungan, setKunjungan] = useState("");
+  // Parent diharapkan menyediakan:
+  // props.modal, props.setModal
+  // props.modalName, props.setModalName
+  // props.data, props.setData
+  // props.cari
+
+  const [kunjungan, setKunjungan] = useState([]);        // ✅ array (bukan string)
   const [siswa, setSiswa] = useState([]);
   const [obat, setDataObat] = useState([]);
-  const [form, setForm] = useState({ obat: [] });
-  const [error, setError] = useState({});
 
-  // Ambil data obat & set form awal
-  useEffect(() => {
-    if (props.view === "kunjungan") {
-      fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=obat")
-        .then((res) => res.json())
-        .then((data) => setDataObat(data))
-        .catch((err) => console.error("Gagal ambil data obat:", err));
-    }
-    // form awal
-    if (props.view === "kunjungan") {
-      setForm({ ...(props.data || {}), obat: props.data?.obat || [] });
-    } else {
-      setForm(props.data || {});
-    }
-  }, [props.data, props.statE]);
+  // Form & error dikontrol dari halaman ini (opsional; Modal juga bisa self-managed)
+  const [form, setForm] = useState({ kelas: "", id_siswa: "", keluhan: "", obat: [], keterangan: "", tanggal: "" });
+  const [error, setError] = useState({});
 
   const getDataKunjungan = () => {
     fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=kunjungan")
-      .then(res => res.json())
-      .then(data => {
-        setKunjungan(data);
-        console.log(data)
-      })
-      .catch(err => console.error("Gagal ambil data kunjungan:", err));
-  }
+      .then((res) => res.json())
+      .then((data) => setKunjungan(data || []))
+      .catch((err) => console.error("Gagal ambil data kunjungan:", err));
+  };
+
   const getDataSiswa = () => {
     fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=siswa")
-      .then(res => res.json())
-      .then(data => {
-        setSiswa(data);
-      })
-      .catch(err => console.error("Gagal ambil data kunjungan:", err));
-  }
+      .then((res) => res.json())
+      .then((data) => setSiswa(data || []))
+      .catch((err) => console.error("Gagal ambil data siswa:", err));
+  };
+
+  const getDataObat = () => {
+    fetch("http://localhost/pkl/Project-UKS/backend/proses/tampil_data.php?type=obat")
+      .then((res) => res.json())
+      .then((data) => setDataObat((data || []).filter((o) => o.is_deleted === "0")))
+      .catch((err) => console.error("Gagal ambil data obat:", err));
+  };
+
   useEffect(() => {
     getDataKunjungan();
     getDataSiswa();
+    getDataObat();
   }, []);
 
-  const funcModal = () => {
-    if (props.setModal) {
-      props.setModal(!props.modal);
-    }
+  // ✅ toggle modal aman (hindari race)
+  const toggleModal = () => props.setModal((v) => !v);
+
+  // ✅ handler tombol dari Table baru
+  const handleEdit = (item) => {
+    props.setData(item);
+    props.setModalName("edit");
+    // set form default berdasarkan item
+    setForm({
+      kelas: item.kelas ?? "",
+      id_siswa: item.id_siswa ?? "",
+      keluhan: item.keluhan ?? "",
+      // backend biasanya menyimpan resep jadi string; pastikan adaptermu mengubah ke array jika perlu
+      obat: item.obat || item.obat_list || [], // fallback
+      keterangan: item.keterangan ?? "",
+      tanggal: (item.tanggal || "").slice(0, 10), // yyyy-mm-dd untuk <input type="date">
+    });
+    props.setModal(true);
+  };
+
+  const handleDelete = (item) => {
+    props.setData(item);
+    props.setModalName("delete");
+    props.setModal(true);
+  };
+
+  const handleInsert = () => {
+    props.setData({});
+    props.setModalName("insert");
+    setForm({ kelas: "", id_siswa: "", keluhan: "", obat: [], keterangan: "", tanggal: "" });
+    props.setModal(true);
   };
 
   return (
-    <div className="w-full h-screen flex">
+    <div className="w-full min-h-screen flex flex-col gap-3">
+
       <Table
-        setM={funcModal}
-        cari={props.cari}
-        funcName={props.setModalName}
-        setData={props.setData}
+        view="kunjungan"
         data={kunjungan}
-        name="data_kunjungan"
-        view={props.view}
+        cari={props.cari}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
       />
+
       <Modal
-        setM={funcModal}
+        stat={props.modal}
+        setM={toggleModal}
         name={props.modalName}
         data={props.data}
+        view="kunjungan"
         siswa={siswa}
         obat={obat}
+        // controlled form (opsional, boleh dihapus kalau mau pakai internal state Modal)
         form={form}
         setForm={setForm}
         error={error}
         setError={setError}
         title={
-          props.modalName === 'edit'
-            ? 'Edit data kunjungan'
-            : props.modalName === 'delete'
-              ? 'Hapus data kunjungan'
-              : props.modalName === 'insert' && 'Tambah data kunjungan'
+          props.modalName === "edit"
+            ? "Edit data kunjungan"
+            : props.modalName === "delete"
+            ? "Hapus data kunjungan"
+            : props.modalName === "insert" && "Tambah data kunjungan"
         }
-        stat={props.modal}
-        onSubmit={(form) => {
+        onSubmit={(formSend) => {
           const formBody = new URLSearchParams();
 
-          for (const key in form) {
+          // serialisasi: 'obat' → JSON string
+          for (const key in formSend) {
             if (key === "obat") {
-              formBody.append(key, JSON.stringify(form[key]));
+              formBody.append("obat", JSON.stringify(formSend.obat || []));
             } else {
-              formBody.append(key, form[key]);
+              formBody.append(key, formSend[key] ?? "");
             }
           }
 
@@ -98,67 +124,66 @@ function Kunjungan(props) {
           if (props.modalName === "insert") {
             endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_tambah.php?type=kunjungan";
           } else if (props.modalName === "edit") {
-            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php";
+            // pastikan id ikut
+            if (props.data?.id) formBody.set("id", props.data.id);
+            endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_edit.php?type=kunjungan";
           } else if (props.modalName === "delete") {
+            // hapus cukup id + type
+            if (props.data?.id) formBody.set("id", props.data.id);
             endpoint = "http://localhost/pkl/Project-UKS/backend/proses/proses_hapus.php?type=kunjungan";
-            formBody.delete("kode_kunjungan");
-            formBody.delete("nama_kunjungan");
-            formBody.delete("jenis_kunjungan");
-            formBody.delete("kandungan");
-            formBody.delete("stock_kunjungan");
-            formBody.append("id", props.data.id);
           }
-          formBody.append("type", "kunjungan");
 
-
-          fetch(endpoint, {
+          return fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: formBody.toString()
+            body: formBody.toString(),
           })
-            .then(res => res.text())
-            .then(text => {
-              console.log("Response asli:", text);
-              let result;
+            .then(async (res) => {
+              const text = await res.text();
               try {
-                result = JSON.parse(text);
-              } catch (e) {
-                throw new Error("Response bukan JSON");
+                return JSON.parse(text);
+              } catch {
+                throw new Error(`Response bukan JSON: ${text}`);
               }
+            })
+            .then((result) => {
               if (result.status === "success") {
                 Swal.fire({
-                  icon: 'success',
-                  title: 'Berhasil!',
-                  text: props.modalName === 'edit'
-                    ? 'Data berhasil diubah'
-                    : props.modalName === 'delete'
-                      ? 'Data berhasil dihapus'
-                      : result.message,
+                  icon: "success",
+                  title: "Berhasil!",
+                  text:
+                    props.modalName === "edit"
+                      ? "Data berhasil diubah"
+                      : props.modalName === "delete"
+                      ? "Data berhasil dihapus"
+                      : "Data berhasil ditambahkan",
                   timer: 1500,
-                  showConfirmButton: false
+                  showConfirmButton: false,
                 });
-                // Refresh data dan tutup modal
-
-                getDataKunjungan && getDataKunjungan();
+                getDataKunjungan();
                 props.setModal(false);
               } else {
                 Swal.fire({
-                  icon: 'error',
-                  title: 'Gagal!',
-                  text: result.message || 'Terjadi kesalahan',
+                  icon: "error",
+                  title: "Gagal!",
+                  text: result.message || "Terjadi kesalahan",
                   showConfirmButton: true,
-                  console: console.log(result)
                 });
               }
-              console.log("Data obat dikirim:", result);
             })
-            .catch(err => console.error("Fetch error:", err));
-            console.log("Body form dikirim:", formBody.toString());
-            
+            .catch((err) => {
+              console.error("Fetch error:", err);
+              Swal.fire({
+                icon: "error",
+                title: "Gagal!",
+                text: "Tidak dapat terhubung ke server",
+                showConfirmButton: true,
+              });
+            });
         }}
-        view={props.view}
       />
     </div>
   );
 }
+
 export default Kunjungan;

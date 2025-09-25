@@ -21,8 +21,11 @@ if ($type === "obat") {
     $satuan = $_POST["satuan"] ?? null;
     $kandungan = $_POST["kandungan"] ?? null;
     $stock_obat = $_POST["stock_obat"] ?? null;
+    $jenis_obat = $_POST["jenis_obat"] ?? null;
+    $keterangan = $_POST["keterangan"] ?? "Penambahan stok awal"; // Tambahan
+    $petugas = $_POST["petugas"] ?? "Admin"; // Tambahan
 
-    if (!$kode_obat || !$nama_obat || !$satuan || !$kandungan || $stock_obat === null) {
+    if (!$kode_obat || !$nama_obat || !$satuan || !$kandungan || $stock_obat === null || !$jenis_obat) {
         sendResponse("error", "Data obat tidak lengkap.");
     }
 
@@ -36,19 +39,17 @@ if ($type === "obat") {
     }
 
     // Insert ke tbl_obat
-    $stmt = $db->prepare("INSERT INTO tbl_obat (kode_obat, nama_obat, satuan, kandungan, stock_obat) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssssi", $kode_obat, $nama_obat, $satuan, $kandungan, $stock_obat);
+    $stmt = $db->prepare("INSERT INTO tbl_obat (kode_obat, nama_obat, satuan, kandungan, stock_obat, jenis_obat) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssis", $kode_obat, $nama_obat, $satuan, $kandungan, $stock_obat, $jenis_obat);
 
     if ($stmt->execute()) {
         // Ambil ID obat yang baru ditambahkan
         $id_obat = $db->insert_id;
 
         // Insert ke tbl_transaksi_obat
-        $id_kunjungan = null; // sesuai permintaan
+        $id_kunjungan = null;
         $qty = $stock_obat;
         $jenis_transaksi = "Masuk";
-        $keterangan = "Penambahan stok awal";
-        $petugas = "Admin"; // bisa diganti sesuai session user
         $created_at = date("Y-m-d H:i:s");
         $updated_at = date("Y-m-d H:i:s");
 
@@ -69,7 +70,10 @@ if ($type === "obat") {
             "nama_obat" => $nama_obat,
             "satuan" => $satuan,
             "kandungan" => $kandungan,
-            "stock_obat" => $stock_obat
+            "stock_obat" => $stock_obat,
+            "jenis_obat" => $jenis_obat,
+            "keterangan" => $keterangan,
+            "petugas" => $petugas
         ]);
     } else {
         sendResponse("error", "Gagal menambahkan obat: " . $stmt->error);
@@ -105,74 +109,80 @@ if ($type === "obat") {
 } elseif ($type === "kunjungan") {
     $obatRaw = $_POST["obat"] ?? "[]";
     $obat = json_decode($obatRaw, true);
-    if (!is_array($obat))
+    if (!is_array($obat)) {
         $obat = [];
-
-    $id_siswa = $_POST["id_siswa"] ?? null;
-    $tanggal = $_POST["tanggal"] ?? date('Y-m-d H:i:s');
-    $keluhan = $_POST["keluhan"] ?? null;
-    $keterangan = $_POST["keterangan"] ?? null; // Tambahkan ini
-
-    if (!$id_siswa || !$keterangan) {
-        sendResponse("error", "Data tidak lengkap. id_siswa atau keterangan kosong.");
     }
 
-    // Tambahkan field keterangan pada query dan bind_param
-    $stmt = $db->prepare("INSERT INTO tbl_kunjungan (id_siswa, tanggal, keluhan, keterangan) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("isss", $id_siswa, $tanggal, $keluhan, $keterangan);
+    $id_siswa   = $_POST["id_siswa"] ?? null;
+    $tanggal    = $_POST["tanggal"] ?? date('Y-m-d H:i:s');
+    $keluhan    = $_POST["keluhan"] ?? null;
+    $petugas    = $_POST["petugas"] ?? "Operator"; // default, bisa dari session
+    $keterangan    = $_POST["keterangan"] ?? "ditambahkan oleh operator"; // default, bisa dari session
+
+    if (!$id_siswa || !$keluhan) {
+        sendResponse("error", "Data tidak lengkap. id_siswa atau keluhan kosong.");
+    }
+
+    // Insert ke tbl_kunjungan
+    $stmt = $db->prepare("INSERT INTO tbl_kunjungan (id_siswa, tanggal, keluhan) VALUES (?, ?, ?)");
+    $stmt->bind_param("iss", $id_siswa, $tanggal, $keluhan);
     if (!$stmt->execute()) {
         sendResponse("error", "Gagal insert kunjungan: " . $stmt->error);
     }
     $id_kunjungan = $stmt->insert_id;
 
     if (!empty($obat)) {
-        // insert ke tbl_transaksi_obat
-        $stmtObat = $db->prepare("INSERT INTO tbl_transaksi_obat (id_kunjungan, id_obat, qty, jenis_transaksi) VALUES (?, ?, ?, ?)");
+        // Insert transaksi obat (otomatis "Keluar")
+        $stmtObat = $db->prepare("INSERT INTO tbl_transaksi_obat 
+            (id_kunjungan, id_obat, qty, jenis_transaksi, keterangan, petugas, created_at, updated_at) 
+            VALUES (?, ?, ?, 'Keluar', ?, ?, ?, ?)");
         if (!$stmtObat) {
-            echo json_encode(["status" => "error", "message" => "Prepare insert transaksi obat gagal: " . $db->error]);
-            exit;
+            sendResponse("error", "Prepare insert transaksi obat gagal: " . $db->error);
         }
 
-        // update jumlah obat di tbl_obat
         $stmtUpdateStock = $db->prepare("UPDATE tbl_obat SET stock_obat = stock_obat - ? WHERE id = ?");
         if (!$stmtUpdateStock) {
-            echo json_encode(["status" => "error", "message" => "Prepare update stock gagal: " . $db->error]);
-            exit;
+            sendResponse("error", "Prepare update stock gagal: " . $db->error);
         }
 
-        foreach ($obat as $o) {
-            $id_obat = $o['id_obat'] ?? null;
-            $qty = $o['jumlah'] ?? 0;
-            $jenis = $o['jenis'] ?? "Keluar"; // default keluar (misal resep diberikan ke siswa)
+        $created_at = date("Y-m-d H:i:s");
+        $updated_at = $created_at;
 
-            if (!$id_obat || $qty <= 0)
-                continue;
+        foreach ($obat as $o) {
+            $id_obat    = $o['id_obat'] ?? null;
+            $qty        = $o['jumlah'] ?? 0;
+
+            if (!$id_obat || $qty <= 0) continue;
 
             // Insert transaksi obat
-            $stmtObat->bind_param("iiis", $id_kunjungan, $id_obat, $qty, $jenis);
+            $stmtObat->bind_param(
+                "iiissss",
+                $id_kunjungan,
+                $id_obat,
+                $qty,
+                $keterangan,
+                $petugas,
+                $created_at,
+                $updated_at
+            );
             if (!$stmtObat->execute()) {
-                echo json_encode(["status" => "error", "message" => "Gagal insert transaksi obat: " . $stmtObat->error]);
-                exit;
+                sendResponse("error", "Gagal insert transaksi obat: " . $stmtObat->error);
             }
 
-            // Update stock obat (hanya jika keluar)
-            if ($jenis === "Keluar") {
-                $stmtUpdateStock->bind_param("ii", $qty, $id_obat);
-                if (!$stmtUpdateStock->execute()) {
-                    echo json_encode(["status" => "error", "message" => "Gagal update stock obat: " . $stmtUpdateStock->error]);
-                    exit;
-                }
+            // Update stok (selalu keluar)
+            $stmtUpdateStock->bind_param("ii", $qty, $id_obat);
+            if (!$stmtUpdateStock->execute()) {
+                sendResponse("error", "Gagal update stock obat: " . $stmtUpdateStock->error);
             }
         }
     }
 
-
     sendResponse("success", "Kunjungan berhasil ditambahkan.", [
         "id_kunjungan" => $id_kunjungan,
-        "id_siswa" => $id_siswa,
-        "tanggal" => $tanggal,
-        "keterangan" => $keterangan, // Tambahkan ini di response
-        "obat" => $obat
+        "id_siswa"     => $id_siswa,
+        "tanggal"      => $tanggal,
+        "keluhan"      => $keluhan,
+        "obat"         => $obat
     ]);
 } else {
     // Default: siswa

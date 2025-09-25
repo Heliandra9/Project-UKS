@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, SideBar } from "./component(admin)/Component";
+import { Button, Sidebar } from "./component(admin)/Component";
 import logo from "./component(admin)/Logo-UKS-Usaha-Kesehatan-Sekolah-Warna.png";
 import Home from "./component(admin)/view/home";
 import Siswa from "./component(admin)/view/data_siswa";
@@ -7,78 +7,76 @@ import Obat from "./component(admin)/view/data_obat";
 import User from "./component(admin)/view/data_user";
 import Kunjungan from "./component(admin)/view/daftar_kunjungan";
 import { useNavigate } from "react-router-dom";
-import Swal from 'sweetalert2';
-import './App.css';
+import Swal from "sweetalert2";
+import "./App.css";
 
 function Admin() {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [nav, setNav] = useState(false);
-  const [hober, setHober] = useState(true);
-  const [modal, setModal] = useState(false);
-  const [view, setView] = useState(localStorage.getItem("view") || "home");
 
+  // ==== UI state ====
+  const [search, setSearch] = useState("");
+  const [view, setView] = useState(localStorage.getItem("view") || "home");
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  // modal insert (diteruskan ke child)
   const [modalName, setModalName] = useState("");
   const [modalInsert, setModalInsert] = useState(false);
   const [data, setData] = useState({});
-  const userType = localStorage.getItem("tipe_user");
 
+  const userType = localStorage.getItem("tipe_user");
+  const username = localStorage.getItem("username") || "User";
+
+  // Persist view
   useEffect(() => {
     localStorage.setItem("view", view);
   }, [view]);
 
+  // Auth guard + role guard + toast login
   useEffect(() => {
     if (localStorage.getItem("isLogin") !== "true") {
-      navigate('/');
+      navigate("/");
       return;
-    } else {
-      if (localStorage.getItem("showLoginSuccess") === "true") {
-        Swal.fire({
-          icon: "success",
-          title: "Login Berhasil!",
-          text: `Selamat datang ${localStorage.getItem("username")}`,
-          timer: 2000,
-          showConfirmButton: false,
-        }).then(() => {
-          localStorage.removeItem("showLoginSuccess");
-        });
-      }
+    }
+
+    if (localStorage.getItem("showLoginSuccess") === "true") {
+      Swal.fire({
+        icon: "success",
+        title: "Login Berhasil!",
+        text: `Selamat datang ${username}`,
+        timer: 1800,
+        showConfirmButton: false,
+      }).then(() => {
+        localStorage.removeItem("showLoginSuccess");
+      });
     }
 
     switch (userType) {
       case "admin":
-        // boleh masuk halaman ini
         break;
-
       case "operator":
-        navigate('/operator');
+        navigate("/operator");
         Swal.fire({
-          icon: 'error',
-          title: 'Akses Ditolak',
-          text: 'Halaman ini hanya untuk admin.',
+          icon: "error",
+          title: "Akses Ditolak",
+          text: "Halaman ini hanya untuk admin.",
         });
         break;
-
       default:
-        navigate('/');
+        navigate("/");
         Swal.fire({
-          icon: 'error',
-          title: 'Akses Ditolak',
-          text: 'Anda tidak memiliki akses ke halaman ini.',
+          icon: "error",
+          title: "Akses Ditolak",
+          text: "Anda tidak memiliki akses ke halaman ini.",
         });
     }
-  }, [navigate, userType]);
+  }, [navigate, userType, username]);
 
-  const funcSearch = (e) => {
-    setSearch(e.target.value);
-  };
-
-  const funcModal = () => {
-    setModal(!modal);
-  };
-
-  const toggleNav = () => {
-    setNav(!nav);
+  // UI actions
+  const funcModalInsert = () => {
+    setModalName("insert");
+    setData({});
+    setModalInsert(true);
   };
 
   const logot = () => {
@@ -90,80 +88,119 @@ function Admin() {
     navigate("/");
   };
 
-  const funcModalInsert = () => {
-    setModalName("insert");
-    setData({});
-    setModalInsert(true);
-  };
-
+  // ==== Layout ====
   return (
-    <div className="w-full h-full flex px-4 py-2 justify-center items-center bg-gray-300">
-      <div
-        onMouseEnter={() => setHober(!hober)}
-        onMouseLeave={() => setHober(!hober)}
-        className={`${nav && hober ? 'sm:w-16 w-full' : 'sm:w-1/6 w-full'} z-100 sm:h-screen shadow-black shadow-lg transition-all duration-300 ease-in-out absolute sm:fixed top-0 left-0`}
-      >
-        <SideBar
-          className={`md:relative`}
-          setView={setView}
-          view={view}
-          nav={nav}
-          hober={hober}
-          logo={logo}
-          logot={logot}
-        />
-      </div>
+    <div className="min-h-screen bg-gray-100">
+      {/* Sidebar fixed (desktop) */}
+      <Sidebar
+        className="hidden md:flex"
+        setView={(v) => {
+          setView(v);
+          setMobileNavOpen(false);
+        }}
+        view={view}
+        logo={logo}
+      />
 
-      <div className={`${nav ? 'w-full ml-16' : 'w-5/6 lg:ml-63 md:ml-40 sm:ml-30'} mt-58 sm:mt-0 transition-all duration-300 ease-in-out h-full flex flex-col`}>
-        <div className="w-full flex mb-2 items-center">
-          <div className="flex">
-            <Button color="white items-center sm:block hidden" onClick={toggleNav}>
-              <i className="bi bi-list"></i>
-            </Button>
+      {/* Sidebar overlay (mobile) */}
+      {mobileNavOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
+            onClick={() => setMobileNavOpen(false)}
+          />
+          <div className="fixed left-0 top-0 z-50 h-full w-64 bg-white md:hidden shadow-xl">
+            <Sidebar
+              className="!flex !h-full"
+              setView={(v) => {
+                setView(v);
+                setMobileNavOpen(false);
+              }}
+              view={view}
+              logo={logo}
+            />
           </div>
+        </>
+      )}
 
-          {(view === "siswa" || view === "obat" || view === "user") ? (
-            <div className="flex ml-6 w-full mr-40">
-              <input
-                onKeyUp={funcSearch}
-                placeholder={`Cari data ${view}`}
-                className="bg-white w-full shadow-md focus:outline-0 px-2 rounded-sm"
-              />
-              <Button onClick={funcModalInsert} width="w-1/6 ml-8" color="blue-500" sizeTxT="text-sm" textColor="white">
-                +&nbsp;Tambah&nbsp;data
-              </Button>
-            </div>
-          ) : view === "kunjungan" && (
-            <div className="flex ml-6 w-full mr-40">
-              <input
-                onKeyUp={funcSearch}
-                placeholder=" kunjungan"
-                className="bg-white w-full shadow-md focus:outline-0 px-2 rounded-sm"
-              />
-              <input
-                type="date"
-                onChange={funcSearch}
-                className="ml-8 bg-white w-1/6 shadow-md focus:outline-0 px-2 rounded-sm"
-              />
-              <Button onClick={funcModalInsert} width="w-1/6 ml-8" color="blue-500" sizeTxT="text-sm" textColor="white">
-                +&nbsp;Tambah&nbsp;data
-              </Button>
-            </div>
-          )}
+      {/* Topbar */}
+      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/80 backdrop-blur">
+        <div className="flex items-center gap-2 px-4 py-3 md:pl-64">
+          {/* Mobile menu button */}
+          <Button
+            variant="outline"
+            className="md:hidden"
+            onClick={() => setMobileNavOpen((s) => !s)}
+          >
+            <i className="bi bi-list text-lg" /> Menu
+          </Button>
 
-          <div className={`absolute top-61 sm:top-4 transition-all duration-300 ease-in-out z-50 shadow-black right-4 ${modal ? ' mb-4 bg-white rounded-2xl p-2 shadow-md' : ''} flex flex-col`}>
-            <p onClick={funcModal} className={`text-lg font-bold bg-white shadow-black ${modal ? '' : `hover:shadow-md`} mb-4 rounded-sm items-center transition-all duration-300 ease-in-out uppercase`}>
-              <i className="bi bi-person-fill bg-yellow-500 rounded-full my-2 ml-2"></i> {localStorage.getItem("username")}&nbsp;&nbsp;
-            </p>
-            <Button color={`red-500 ${modal ? '' : 'hidden'} bottom-0`} textColor="white" onClick={logot}>
-              <i className="bi bi-box-arrow-right"></i> Log Out
-            </Button>
+          {/* Search & CTA */}
+          <div className="ml-auto flex w-full max-w-3xl items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full rounded-xl border border-gray-300 bg-white px-10 py-2.5 text-sm shadow-sm placeholder:text-gray-400 focus:border-[#FD3A69] focus:outline-none focus:ring-[#FD3A69]"
+                placeholder={
+                  view === "kunjungan" ? "Cari kunjungan…" : `Cari data ${view}…`
+                }
+              />
+              <i className="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
+
+            {(view === "siswa" ||
+              view === "obat" ||
+              view === "user" ||
+              view === "kunjungan") && (
+              <>
+                {view === "kunjungan" && (
+                  <input
+                    type="date"
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="hidden sm:block w-48 rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-[#FD3A69] focus:outline-none"
+                  />
+                )}
+                <Button onClick={funcModalInsert} className="whitespace-nowrap">
+                  + Tambah data
+                </Button>
+              </>
+            )}
+
+            {/* User menu */}
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen((s) => !s)}
+                className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm hover:bg-gray-50"
+              >
+                <i className="bi bi-person-fill bg-yellow-500 text-white rounded-full p-1" />
+                <span className="hidden sm:inline font-semibold">{username}</span>
+                <i className="bi bi-chevron-down text-gray-500" />
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-44 rounded-xl border border-gray-200 bg-white p-2 shadow-lg">
+                  <Button
+                    variant="danger"
+                    className="w-full justify-center"
+                    onClick={logot}
+                  >
+                    <i className="bi bi-box-arrow-right" /> Log Out
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
+      </header>
 
-        <div className="w-full h-full bg-white rounded-lg p-4 shadow-lg">
-          {view === "home" ? <Home /> :
-            view === "siswa" ? <Siswa
+      {/* Main content */}
+      <main className="px-4 pb-10 pt-4 pl-4 sm:pl-68">
+        <div className="w-full rounded-2xl bg-white p-4 shadow-sm">
+          {view === "home" ? (
+            <Home />
+          ) : view === "siswa" ? (
+            <Siswa
               modalName={modalName}
               setModalName={setModalName}
               modal={modalInsert}
@@ -172,8 +209,32 @@ function Admin() {
               setData={setData}
               cari={search}
               view={view}
-            /> :
-              view === "obat" ? <Obat
+            />
+          ) : view === "obat" ? (
+            <Obat
+              modalName={modalName}
+              setModalName={setModalName}
+              modal={modalInsert}
+              setModal={setModalInsert}
+              data={data}
+              setData={setData}
+              cari={search}
+              view={view}
+            />
+          ) : view === "user" ? (
+            <User
+              modalName={modalName}
+              setModalName={setModalName}
+              modal={modalInsert}
+              setModal={setModalInsert}
+              data={data}
+              setData={setData}
+              cari={search}
+              view={view}
+            />
+          ) : (
+            view === "kunjungan" && (
+              <Kunjungan
                 modalName={modalName}
                 setModalName={setModalName}
                 modal={modalInsert}
@@ -182,30 +243,11 @@ function Admin() {
                 setData={setData}
                 cari={search}
                 view={view}
-              /> :
-                view === "user" ? <User
-                  modalName={modalName}
-                  setModalName={setModalName}
-                  modal={modalInsert}
-                  setModal={setModalInsert}
-                  data={data}
-                  setData={setData}
-                  cari={search}
-                  view={view}
-                /> :
-                  view === "kunjungan" && <Kunjungan
-                    modalName={modalName}
-                    setModalName={setModalName}
-                    modal={modalInsert}
-                    setModal={setModalInsert}
-                    data={data}
-                    setData={setData}
-                    cari={search}
-                    view={view}
-                  />
-          }
+              />
+            )
+          )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
